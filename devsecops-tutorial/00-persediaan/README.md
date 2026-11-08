@@ -164,7 +164,7 @@ Harbor (registry) dan GitLab (repo dan pipeline untuk Modul 6) berjalan di serve
 | GitLab | `https://gitlab.lab.test:8929` |
 | Projek Harbor anda | `pesertaNN` (NN = nombor anda, 01 hingga 10) |
 | Pengguna Harbor dan GitLab | `pesertaNN` |
-| Kata laluan | diberi oleh instruktur (kata laluan Harbor dan GitLab berbeza) |
+| Kata laluan | diberi oleh instruktur (**sama** untuk Harbor dan GitLab) |
 | Projek GitLab anda | `pesertaNN/devsecops-lab` (kosong, sedia untuk Modul 6) |
 
 > Anda hanya menggunakan GitLab jika memilih **GitLab CI** pada Modul 6, tetapi sediakan akses sekarang supaya tidak terhenti pada Hari 4.
