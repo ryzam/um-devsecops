@@ -1,0 +1,62 @@
+diff --git a/aspnet-app/Program.cs b/aspnet-app/Program.cs
+index a49a64f..9602e90 100644
+--- a/aspnet-app/Program.cs
++++ b/aspnet-app/Program.cs
+@@ -41,13 +41,14 @@ app.MapGet("/", () => Html(
+ app.MapGet("/search", (string? q) =>
+ {
+     q ??= "";
+-    var sql = "SELECT id, name, price FROM products WHERE name LIKE '%" + q + "%'";
++    var sql = "SELECT id, name, price FROM products WHERE name LIKE @q";
+     var rows = new StringBuilder();
+     using var conn = new SqliteConnection(ConnectionString);
+     conn.Open();
+     try
+     {
+         using var cmd = new SqliteCommand(sql, conn);
++        cmd.Parameters.AddWithValue("@q", "%" + q + "%");
+         using var r = cmd.ExecuteReader();
+         while (r.Read())
+             rows.Append($"<tr><td>{r.GetInt64(0)}</td><td>{r.GetString(1)}</td><td>{r.GetDouble(2):F2}</td></tr>");
+@@ -92,13 +93,16 @@ app.MapPost("/guestbook", async (HttpRequest req) =>
+ app.MapGet("/ping", (string? host) =>
+ {
+     host ??= "127.0.0.1";
+-    var psi = new ProcessStartInfo("/bin/sh")
++    if (!System.Text.RegularExpressions.Regex.IsMatch(host, @"^[A-Za-z0-9.\-]{1,253}$"))
++        return Results.BadRequest("Nama hos tidak sah");
++    var psi = new ProcessStartInfo("ping")
+     {
+         RedirectStandardOutput = true,
+         RedirectStandardError = true
+     };
+     psi.ArgumentList.Add("-c");
+-    psi.ArgumentList.Add("ping -c 1 " + host);
++    psi.ArgumentList.Add("1");
++    psi.ArgumentList.Add(host);
+     using var p = Process.Start(psi)!;
+     var output = p.StandardOutput.ReadToEnd() + p.StandardError.ReadToEnd();
+     p.WaitForExit();
+@@ -125,10 +129,12 @@ app.MapPost("/login", async (HttpRequest req, HttpResponse res) =>
+     var form = await req.ReadFormAsync();
+     var username = form["username"].ToString();
+     var password = form["password"].ToString();
+-    var sql = "SELECT username, role FROM users WHERE username = '" + username + "' AND password_hash = '" + Db.Md5(password) + "'";
++    var sql = "SELECT username, role FROM users WHERE username = @u AND password_hash = @p";
+     using var conn = new SqliteConnection(ConnectionString);
+     conn.Open();
+     using var cmd = new SqliteCommand(sql, conn);
++    cmd.Parameters.AddWithValue("@u", username);
++    cmd.Parameters.AddWithValue("@p", Db.Md5(password));
+     using var r = cmd.ExecuteReader();
+     if (r.Read())
+     {
+@@ -201,7 +207,7 @@ app.MapPost("/api/import", async (HttpRequest req) =>
+ {
+     using var reader = new StreamReader(req.Body);
+     var body = await reader.ReadToEndAsync();
+-    var obj = JsonConvert.DeserializeObject(body, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
++    var obj = JsonConvert.DeserializeObject<Dictionary<string, object>>(body);
+     return Results.Ok(new { received = obj?.GetType().Name });
+ });
+ 

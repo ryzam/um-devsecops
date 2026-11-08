@@ -1,0 +1,5 @@
+devsecops-lab/
+devsecops-instruktur/
+zap-hasil/
+*.key
+.env

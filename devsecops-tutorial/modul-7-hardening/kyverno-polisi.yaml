@@ -1,0 +1,70 @@
+# Dasar Kyverno untuk kluster lab (tindakan Enforce: tolak pada admission).
+# 1. Tag :latest dan imej tanpa tag tidak dibenarkan.
+# 2. Imej mesti datang daripada Harbor lab.
+# Kedua-dua dasar dikecualikan untuk namespace sistem.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: imej-tag-tetap
+  annotations:
+    policies.kyverno.io/title: Tag imej mesti tetap
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: tolak-latest
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      exclude:
+        any:
+          - resources:
+              namespaces: ["kube-system", "kyverno"]
+      validate:
+        message: "Tag ':latest' tidak dibenarkan. Guna tag tetap atau digest."
+        pattern:
+          spec:
+            containers:
+              - image: "!*:latest"
+    - name: wajib-tag
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      exclude:
+        any:
+          - resources:
+              namespaces: ["kube-system", "kyverno"]
+      validate:
+        message: "Imej mesti mempunyai tag atau digest."
+        pattern:
+          spec:
+            containers:
+              - image: "*:* | *@sha256:*"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: imej-daripada-harbor
+  annotations:
+    policies.kyverno.io/title: Imej hanya daripada Harbor lab
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: registry-dibenarkan
+      match:
+        any:
+          - resources:
+              kinds: ["Pod"]
+      exclude:
+        any:
+          - resources:
+              namespaces: ["kube-system", "kyverno"]
+      validate:
+        message: "Imej mesti daripada harbor.lab.test."
+        pattern:
+          spec:
+            containers:
+              - image: "harbor.lab.test/*"

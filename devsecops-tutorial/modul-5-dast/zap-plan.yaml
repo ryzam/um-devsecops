@@ -1,0 +1,41 @@
+# Pelan ZAP Automation Framework: imbasan aktif yang ringan untuk laptop 8 GB.
+# Guna dari folder repo (selepas `source alat.sh`):
+#   cp zap-plan.yaml zap-hasil/ && zap zap.sh -cmd -autorun /zap/wrk/zap-plan.yaml
+# Ubah URL pada baris "urls" dan "includePaths" jika nama kontena app bukan "kedai".
+env:
+  contexts:
+    - name: kedai
+      urls:
+        - http://kedai:8080
+      includePaths:
+        - http://kedai:8080.*
+  parameters:
+    failOnError: false
+    progressToStdout: true
+jobs:
+  - type: spider
+    parameters:
+      context: kedai
+      maxDuration: 1
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 1
+  - type: activeScan
+    parameters:
+      context: kedai
+      maxRuleDurationInMins: 1
+      maxScanDurationInMins: 4
+    policyDefinition:
+      defaultStrength: Medium
+      defaultThreshold: Medium
+      rules:
+        # Peraturan DOM XSS memerlukan pelayar tanpa kepala dan menggunakan memori yang banyak.
+        - id: 40026
+          name: Cross Site Scripting (DOM Based)
+          threshold: "Off"
+          strength: Default
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: /zap/wrk
+      reportFile: pelan.json

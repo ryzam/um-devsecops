@@ -1,0 +1,11 @@
+# Namespace "lab" dengan Pod Security Standards tahap "restricted":
+# API server menolak pod yang melanggar (privileged, root, hostPath, dll).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lab
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/audit: restricted

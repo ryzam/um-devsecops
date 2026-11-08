@@ -1,0 +1,31 @@
+# NetworkPolicy untuk namespace "lab".
+# 1. Tolak semua trafik masuk secara lalai.
+# 2. Benarkan trafik masuk ke app hanya daripada pod dalam namespace yang berlabel akses=dibenarkan.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tolak-semua-masuk
+  namespace: lab
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: benarkan-klien
+  namespace: lab
+spec:
+  podSelector:
+    matchLabels:
+      app: APP
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              akses: dibenarkan
+      ports:
+        - port: 8080

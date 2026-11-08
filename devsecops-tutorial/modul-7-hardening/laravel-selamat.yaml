@@ -1,0 +1,110 @@
+# Manifest yang dikeraskan untuk laravel-app (Trek B). Ganti PESERTA dengan nama projek Harbor anda:
+#   sed "s/PESERTA/peserta03/g" laravel-selamat.yaml | kubectl apply -f -
+# Prasyarat dalam namespace "lab":
+#   secret "harbor" (imagePullSecret) dan secret "laravel-rahsia" (kunci PAYMENT_API_KEY); lihat README.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-app
+  namespace: lab
+  labels:
+    app: laravel-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: laravel-app
+  template:
+    metadata:
+      labels:
+        app: laravel-app
+    spec:
+      automountServiceAccountToken: false
+      imagePullSecrets:
+        - name: harbor
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001         # pengguna "aplikasi" dalam imej (UID berangka)
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          image: harbor.lab.test/PESERTA/laravel-app:selamat   # tag tetap, bukan :latest
+          imagePullPolicy: IfNotPresent
+          # Sistem fail akar baca sahaja; storan, cache dan pangkalan data SQLite berada di volum boleh tulis
+          command: ["sh", "-c"]
+          args:
+            - |
+              touch /data/database.sqlite
+              export APP_KEY="${APP_KEY:-$(php artisan key:generate --show)}"
+              php artisan migrate --force --seed && exec php artisan serve --host=0.0.0.0 --port=8080
+          ports:
+            - containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          env:
+            - name: DB_DATABASE
+              value: /data/database.sqlite
+            - name: LOG_CHANNEL
+              value: stderr
+            - name: VIEW_COMPILED_PATH
+              value: /tmp/views
+            - name: PAYMENT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-rahsia
+                  key: PAYMENT_API_KEY
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /up
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /up
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+            - name: storan
+              mountPath: /app/storage
+            - name: cache
+              mountPath: /app/bootstrap/cache
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: storan
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: laravel-app
+  namespace: lab
+spec:
+  type: ClusterIP
+  selector:
+    app: laravel-app
+  ports:
+    - port: 80
+      targetPort: 8080

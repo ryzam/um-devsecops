@@ -1,0 +1,85 @@
+diff --git a/aspnet-app/Program.cs b/aspnet-app/Program.cs
+index 9602e90..9e16116 100644
+--- a/aspnet-app/Program.cs
++++ b/aspnet-app/Program.cs
+@@ -10,16 +10,28 @@ const string ConnectionString = "Data Source=app.db";
+ 
+ var builder = WebApplication.CreateBuilder(args);
+ builder.Services.AddOpenApi();
+-builder.Services.AddCors(o => o.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
++builder.Services.AddCors(o => o.AddDefaultPolicy(p => p.WithOrigins("https://kedai.example").AllowAnyHeader().WithMethods("GET", "POST")));
+ 
+ var app = builder.Build();
+ 
+-app.UseDeveloperExceptionPage();
++if (app.Environment.IsDevelopment()) app.UseDeveloperExceptionPage();
++else app.UseExceptionHandler(a => a.Run(c => c.Response.WriteAsync("Ralat dalaman")));
+ app.UseCors();
++app.Use(async (ctx, next) =>
++{
++    ctx.Response.Headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'";
++    ctx.Response.Headers["X-Content-Type-Options"] = "nosniff";
++    ctx.Response.Headers["X-Frame-Options"] = "DENY";
++    ctx.Response.Headers["Permissions-Policy"] = "geolocation=(), camera=(), microphone=()";
++    ctx.Response.Headers["Referrer-Policy"] = "no-referrer";
++    await next();
++});
+ app.MapOpenApi();
+ 
+ Db.Init(ConnectionString);
+ 
++static string E(string? s) => System.Net.WebUtility.HtmlEncode(s ?? "");
++
+ static IResult Html(string body) =>
+     Results.Content(
+         "<!doctype html><html lang='ms'><head><meta charset='utf-8'><title>Kedai Bengkel</title></head><body>" +
+@@ -51,13 +63,13 @@ app.MapGet("/search", (string? q) =>
+         cmd.Parameters.AddWithValue("@q", "%" + q + "%");
+         using var r = cmd.ExecuteReader();
+         while (r.Read())
+-            rows.Append($"<tr><td>{r.GetInt64(0)}</td><td>{r.GetString(1)}</td><td>{r.GetDouble(2):F2}</td></tr>");
++            rows.Append($"<tr><td>{r.GetInt64(0)}</td><td>{E(r.GetString(1))}</td><td>{r.GetDouble(2):F2}</td></tr>");
+     }
+     catch (Exception ex)
+     {
+-        rows.Append("<tr><td colspan='3'>Ralat: " + ex.Message + "</td></tr>");
++        rows.Append("<tr><td colspan='3'>Ralat semasa mencari</td></tr>");
+     }
+-    return Html($"<h1>Hasil carian untuk: {q}</h1><table border='1'><tr><th>ID</th><th>Nama</th><th>Harga (RM)</th></tr>{rows}</table>");
++    return Html($"<h1>Hasil carian untuk: {E(q)}</h1><table border='1'><tr><th>ID</th><th>Nama</th><th>Harga (RM)</th></tr>{rows}</table>");
+ });
+ 
+ // Stored XSS + tiada perlindungan CSRF
+@@ -69,7 +81,7 @@ app.MapGet("/guestbook", () =>
+     using var cmd = new SqliteCommand("SELECT name, message FROM guestbook ORDER BY id DESC", conn);
+     using var r = cmd.ExecuteReader();
+     while (r.Read())
+-        items.Append($"<li><b>{r.GetString(0)}</b>: {r.GetString(1)}</li>");
++        items.Append($"<li><b>{E(r.GetString(0))}</b>: {E(r.GetString(1))}</li>");
+     return Html(
+         "<h1>Buku pelawat</h1>" +
+         "<form method='post' action='/guestbook'>" +
+@@ -106,18 +118,19 @@ app.MapGet("/ping", (string? host) =>
+     using var p = Process.Start(psi)!;
+     var output = p.StandardOutput.ReadToEnd() + p.StandardError.ReadToEnd();
+     p.WaitForExit();
+-    return Html($"<h1>Ping {host}</h1><pre>{output}</pre>");
++    return Html($"<h1>Ping {E(host)}</h1><pre>{E(output)}</pre>");
+ });
+ 
+ // Path traversal
+ app.MapGet("/download", (string file) =>
+ {
+-    var path = Path.Combine("files", file);
+-    return File.Exists(path) ? Results.Text(File.ReadAllText(path)) : Results.NotFound("Fail tidak ditemui");
++    var akar = Path.GetFullPath("files") + Path.DirectorySeparatorChar;
++    var path = Path.GetFullPath(Path.Combine("files", file));
++    return path.StartsWith(akar) && File.Exists(path) ? Results.Text(File.ReadAllText(path)) : Results.NotFound("Fail tidak ditemui");
+ });
+ 
+ // Open redirect
+-app.MapGet("/redirect", (string url) => Results.Redirect(url));
++app.MapGet("/redirect", (string url) => url.StartsWith("/") && !url.StartsWith("//") ? Results.LocalRedirect(url) : Results.BadRequest("URL tidak dibenarkan"));
+ 
+ app.MapGet("/login", () => Html(
+     "<h1>Log masuk</h1><form method='post' action='/login'>" +

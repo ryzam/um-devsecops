@@ -1,0 +1,17 @@
+title = "Peraturan tambahan bengkel"
+
+# Guna semua peraturan lalai Gitleaks, kemudian tambah satu peraturan sendiri.
+[extend]
+useDefault = true
+
+# Peraturan lalai tidak menangkap secret dalam YAML Kubernetes kerana nama dan nilai
+# berada pada dua baris berasingan:
+#   - name: Jwt__Secret
+#     value: "57fD6LPgVOzIeLPIJBYVdeeJ"
+[[rules]]
+id = "k8s-env-secret"
+description = "Pemboleh ubah env K8s yang namanya mengandungi secret/password/key dengan nilai tetap"
+regex = '''(?i)name:\s*["']?[\w.-]*(?:secret|password|passwd|api_?key|token)[\w.-]*["']?\s*\n\s*value:\s*["']?([A-Za-z0-9_\-/+=.]{12,})["']?'''
+secretGroup = 1
+path = '''\.ya?ml$'''
+keywords = ["value"]

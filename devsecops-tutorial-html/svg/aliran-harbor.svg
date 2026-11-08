@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" role="img" aria-labelledby="aht ahd"><title id="aht">Aliran image ke Harbor</title><desc id="ahd">Image dibina dan ditolak ke Harbor. Trivy mengimbas secara automatik. Polisi menyekat pull jika ada kerentanan High atau lebih tinggi, dengan jawapan HTTP 412; image bersih boleh ditarik.</desc><style>svg{--d-zone:#f3f5f8;--d-zone2:#f8f6f1;--d-box:#ffffff;--d-line:#b9c2cf;--d-fg:#18202c;--d-muted:#5a6577;--d-acc:#2457c5;--d-accbg:#e6edfb;--d-warn:#b4540b;--d-warnbg:#fbeee2;--d-ok:#1f7a4d;--d-okbg:#e3f3ea;--d-arrow:#6b7688;--d-grid:#e1e5eb;--d-font:'IBM Plex Sans',system-ui,sans-serif;--d-mono:'IBM Plex Mono',ui-monospace,monospace}@media (prefers-color-scheme:dark){svg{--d-zone:#1a212c;--d-zone2:#211f1b;--d-box:#121821;--d-line:#3c4757;--d-fg:#e6eaf0;--d-muted:#9aa5b6;--d-acc:#7ea4ff;--d-accbg:#1d2a45;--d-warn:#f0a35e;--d-warnbg:#3a2717;--d-ok:#5fcf93;--d-okbg:#16301f;--d-arrow:#8b96a8;--d-grid:#2a3340}}
+.zone{fill:var(--d-zone);stroke:var(--d-line);stroke-width:1.2}
+.zone2{fill:var(--d-zone2);stroke:var(--d-line);stroke-width:1.2;stroke-dasharray:6 4}
+.box{fill:var(--d-box);stroke:var(--d-line);stroke-width:1.2}
+.acc{fill:var(--d-accbg);stroke:var(--d-acc);stroke-width:1.4}
+.warn{fill:var(--d-warnbg);stroke:var(--d-warn);stroke-width:1.4}
+.okb{fill:var(--d-okbg);stroke:var(--d-ok);stroke-width:1.4}
+.solid{fill:var(--d-acc)}
+.t{fill:var(--d-fg);font-size:14px}
+.th{fill:var(--d-fg);font-size:14px;font-weight:600}
+.ts{fill:var(--d-muted);font-size:12px}
+.tl{fill:var(--d-muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+.ta{fill:var(--d-acc);font-size:12px;font-weight:600}
+.tw{fill:var(--d-warn);font-size:12px;font-weight:600}
+.m{font-family:var(--d-mono)}
+.arr{fill:none;stroke:var(--d-arrow);stroke-width:1.6}
+.arra{fill:none;stroke:var(--d-acc);stroke-width:1.8}
+.dash{stroke-dasharray:5 4}
+.grid{stroke:var(--d-grid);stroke-width:1}
+.area{fill:var(--d-accbg);stroke:var(--d-acc);stroke-width:2}
+.head{fill:var(--d-arrow)}
+.heada{fill:var(--d-acc)}
+text{font-family:var(--d-font)}
+</style><defs><marker id="ahh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head"/></marker><marker id="aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="heada"/></marker></defs><rect x="10" y="14" width="880" height="44" rx="8" class="zone"/><text x="26" y="41" class="ts" text-anchor="start">Perhatian: binaan Docker lalai menambah attestation (OCI index) dan polisi tidak berkuat kuasa. Gunakan --provenance=false.</text><rect x="10" y="90" width="120" height="64" rx="8" class="box"/><text x="70.0" y="119.0" class="th" text-anchor="middle">docker build</text><text x="70.0" y="137.0" class="ts" text-anchor="middle">provenance=false</text><rect x="170" y="90" width="120" height="64" rx="8" class="box"/><text x="230.0" y="119.0" class="th" text-anchor="middle">docker push</text><text x="230.0" y="137.0" class="ts" text-anchor="middle">ke peserta01/</text><rect x="330" y="90" width="140" height="64" rx="8" class="acc"/><text x="400.0" y="119.0" class="th" text-anchor="middle">Harbor simpan</text><text x="400.0" y="137.0" class="ts" text-anchor="middle">projek peserta01</text><rect x="510" y="90" width="130" height="64" rx="8" class="acc"/><text x="575.0" y="119.0" class="th" text-anchor="middle">Trivy imbas</text><text x="575.0" y="137.0" class="ts" text-anchor="middle">automatik</text><rect x="680" y="90" width="130" height="64" rx="8" class="warn"/><text x="745.0" y="119.0" class="th" text-anchor="middle">Polisi</text><text x="745.0" y="137.0" class="ts" text-anchor="middle">ambang High</text><path d="M130,122 H168" class="arr" marker-end="url(#ahh)"/><path d="M290,122 H328" class="arr" marker-end="url(#ahh)"/><path d="M470,122 H508" class="arr" marker-end="url(#ahh)"/><path d="M640,122 H678" class="arr" marker-end="url(#ahh)"/><path d="M745,154 V196" class="arr" marker-end="url(#ahh)"/><path d="M745,196 H640" class="arr" marker-end="url(#ahh)"/><rect x="470" y="196" width="170" height="64" rx="8" class="warn"/><text x="555.0" y="225.0" class="th" text-anchor="middle">Pull ditolak</text><text x="555.0" y="243.0" class="ts" text-anchor="middle">HTTP 412 Precondition Failed</text><path d="M810,122 H860 V228 H842" class="arr" marker-end="url(#ahh)"/><rect x="690" y="196" width="150" height="64" rx="8" class="okb"/><text x="765.0" y="225.0" class="th" text-anchor="middle">Pull dibenarkan</text><text x="765.0" y="243.0" class="ts" text-anchor="middle">tiada High / Critical</text></svg>

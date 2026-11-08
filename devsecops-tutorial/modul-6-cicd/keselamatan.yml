@@ -1,0 +1,147 @@
+# Pipeline keselamatan untuk Kedai Bengkel.
+# Letak di .github/workflows/keselamatan.yml dalam repo GitHub anda.
+#
+# Pembolehubah repo (Settings > Secrets and variables > Actions > Variables):
+#   APP_DIR      aspnet-app  atau  laravel-app
+#   HARBOR_USER  contoh: robot$peserta03+ci
+# Secret repo:
+#   HARBOR_PASSWORD   rahsia robot account Harbor
+#   HARBOR_CA         kandungan ca.crt (sijil awam CA lab)
+#   COSIGN_PRIVATE_KEY, COSIGN_PASSWORD   kunci dan kata laluan untuk menandatangani imej
+name: keselamatan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Kebenaran minimum untuk GITHUB_TOKEN. Tambah hanya jika job memerlukan.
+permissions:
+  contents: read
+
+env:
+  HARBOR: harbor.lab.test
+  HARBOR_IP: 192.53.174.104
+  APP_DIR: ${{ vars.APP_DIR }}
+
+jobs:
+  imbas:
+    name: Imbas kod (secret, SAST, SCA, IaC)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      # Sematkan action pada SHA commit, bukan tag yang boleh dialihkan.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0   # Gitleaks perlu sejarah penuh
+          persist-credentials: false
+
+      - name: Secret Detection (Gitleaks)
+        run: |
+          ARGS=()
+          [ -f gitleaks-baseline.json ] && ARGS=(--baseline-path gitleaks-baseline.json)
+          docker run --rm -v "$PWD":/repo -w /repo \
+            -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/repo \
+            zricethezav/gitleaks:v8.30.1 git . --no-banner --redact "${ARGS[@]}"
+
+      - name: SAST (Semgrep)
+        run: |
+          docker run --rm -v "$PWD":/src -w /src -e SEMGREP_SEND_METRICS=off \
+            semgrep/semgrep:1.183.0 semgrep scan --quiet \
+            --config p/default --config p/gitlab --config p/phpcs-security-audit \
+            --severity ERROR --error "$APP_DIR"
+
+      - name: SCA (Trivy fs)
+        run: |
+          docker run --rm -v "$PWD":/work -w /work aquasec/trivy:0.76.2 \
+            fs --scanners vuln --severity HIGH,CRITICAL --exit-code 1 "$APP_DIR"
+
+      - name: IaC (Trivy config)
+        run: |
+          for d in "$APP_DIR" k8s terraform; do
+            docker run --rm -v "$PWD":/work -w /work aquasec/trivy:0.76.2 \
+              config --severity HIGH,CRITICAL --exit-code 1 "$d"
+          done
+
+  imej:
+    name: Bina, imbas, tolak dan tandatangani imej
+    needs: imbas
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Sedia akses ke Harbor (hosts dan CA lab)
+        env:
+          HARBOR_CA: ${{ secrets.HARBOR_CA }}
+        run: |
+          echo "$HARBOR_IP $HARBOR" | sudo tee -a /etc/hosts
+          echo "$HARBOR_CA" | sudo tee /usr/local/share/ca-certificates/lab-ca.crt >/dev/null
+          sudo update-ca-certificates
+          sudo mkdir -p "/etc/docker/certs.d/$HARBOR"
+          echo "$HARBOR_CA" | sudo tee "/etc/docker/certs.d/$HARBOR/ca.crt" >/dev/null
+
+      - name: Bina imej
+        run: |
+          IMG="$HARBOR/${HARBOR_USER_PROJECT}/${APP_DIR}:${GITHUB_SHA::12}"
+          echo "IMG=$IMG" >> "$GITHUB_ENV"
+          docker buildx build --provenance=false --sbom=false --load -t "$IMG" "$APP_DIR"
+        env:
+          # Nama projek diambil daripada pembolehubah: robot$peserta03+ci -> peserta03
+          HARBOR_USER_PROJECT: ${{ vars.HARBOR_PROJECT }}
+
+      - name: Imbas imej (gagal jika ada Critical)
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.76.2 \
+            image --severity CRITICAL --exit-code 1 "$IMG"
+
+      - name: Jana SBOM
+        run: |
+          docker run --rm -v "$PWD":/work -w /work -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.76.2 \
+            image --quiet --format cyclonedx --output sbom.cdx.json "$IMG"
+
+      - name: Tolak ke Harbor
+        env:
+          HARBOR_USER: ${{ vars.HARBOR_USER }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+        run: |
+          echo "$HARBOR_PASSWORD" | docker login "$HARBOR" -u "$HARBOR_USER" --password-stdin
+          docker push "$IMG"
+
+      - name: Tunggu imbasan Harbor selesai
+        env:
+          HARBOR_USER: ${{ vars.HARBOR_USER }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+          HARBOR_PROJECT: ${{ vars.HARBOR_PROJECT }}
+        run: |
+          TAG="${GITHUB_SHA::12}"
+          for _ in $(seq 1 40); do
+            S=$(curl -s -u "$HARBOR_USER:$HARBOR_PASSWORD" \
+              "https://$HARBOR/api/v2.0/projects/$HARBOR_PROJECT/repositories/$APP_DIR/artifacts/$TAG?with_scan_overview=true" \
+              | python3 -c 'import json,sys; d=json.load(sys.stdin); o=list(d.get("scan_overview",{}).values()); print(o[0]["scan_status"] if o else "none")')
+            echo "imbasan Harbor: $S"
+            [ "$S" = "Success" ] && exit 0
+            sleep 5
+          done
+          echo "Imbasan Harbor tidak selesai tepat pada masanya" >&2
+          exit 1
+
+      - name: Pasang cosign (disahkan dengan checksum)
+        run: |
+          curl -fsSL -o cosign https://github.com/sigstore/cosign/releases/download/v3.1.4/cosign-linux-amd64
+          echo "424e2c97d0b45fd7a6b608a87f090f35633f4c23ece5f092d48bba11aaf4bbfa  cosign" | sha256sum -c -
+          sudo install -m 0755 cosign /usr/local/bin/cosign
+
+      - name: Tandatangani imej dan lampirkan SBOM
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          DIGEST=$(docker buildx imagetools inspect --format '{{.Manifest.Digest}}' "$IMG")
+          REF="${IMG%:*}@$DIGEST"
+          # Format tandatangan lama (tag .sig) supaya Kyverno 1.19 dapat mengesahkannya
+          cosign sign --key env://COSIGN_PRIVATE_KEY --yes --new-bundle-format=false --use-signing-config=false "$REF"
+          cosign attest --key env://COSIGN_PRIVATE_KEY --type cyclonedx --predicate sbom.cdx.json --yes "$REF"

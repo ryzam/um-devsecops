@@ -1,0 +1,140 @@
+diff --git a/laravel-app/app/Http/Middleware/SecurityHeaders.php b/laravel-app/app/Http/Middleware/SecurityHeaders.php
+new file mode 100644
+index 0000000..1706fc4
+--- /dev/null
++++ b/laravel-app/app/Http/Middleware/SecurityHeaders.php
+@@ -0,0 +1,22 @@
++<?php
++
++namespace App\Http\Middleware;
++
++use Closure;
++use Illuminate\Http\Request;
++use Symfony\Component\HttpFoundation\Response;
++
++class SecurityHeaders
++{
++    public function handle(Request $request, Closure $next): Response
++    {
++        $response = $next($request);
++        $response->headers->set('Content-Security-Policy', "default-src 'self'; frame-ancestors 'none'");
++        $response->headers->set('X-Content-Type-Options', 'nosniff');
++        $response->headers->set('X-Frame-Options', 'DENY');
++        $response->headers->set('Permissions-Policy', 'geolocation=(), camera=(), microphone=()');
++        $response->headers->set('Referrer-Policy', 'no-referrer');
++        $response->headers->remove('X-Powered-By');
++        return $response;
++    }
++}
+diff --git a/laravel-app/bootstrap/app.php b/laravel-app/bootstrap/app.php
+index fd0e574..6e80a75 100644
+--- a/laravel-app/bootstrap/app.php
++++ b/laravel-app/bootstrap/app.php
+@@ -13,7 +13,8 @@
+     )
+     ->withMiddleware(function (Middleware $middleware): void {
+         // SENGAJA tidak selamat: perlindungan CSRF dimatikan untuk laluan ini.
+-        $middleware->preventRequestForgery(except: ['guestbook', 'login', 'api/*']);
++        $middleware->preventRequestForgery(except: ['api/*']);
++        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+         // SENGAJA tidak selamat: cookie "session" tidak disulitkan, jadi klien boleh memalsukannya.
+         $middleware->encryptCookies(except: ['session']);
+     })
+diff --git a/laravel-app/resources/views/guestbook.blade.php b/laravel-app/resources/views/guestbook.blade.php
+index 690278c..76f3a34 100644
+--- a/laravel-app/resources/views/guestbook.blade.php
++++ b/laravel-app/resources/views/guestbook.blade.php
+@@ -2,11 +2,12 @@
+ @section('content')
+ <h1>Buku pelawat</h1>
+ <form method="post" action="/guestbook">
++    @csrf
+     <input name="name" placeholder="Nama"> <input name="message" placeholder="Mesej"> <button>Hantar</button>
+ </form>
+ <ul>
+     @foreach($items as $m)
+-    <li><b>{!! $m->name !!}</b>: {!! $m->message !!}</li>
++    <li><b>{{ $m->name }}</b>: {{ $m->message }}</li>
+     @endforeach
+ </ul>
+ @endsection
+diff --git a/laravel-app/resources/views/login.blade.php b/laravel-app/resources/views/login.blade.php
+index 90bef92..9216eff 100644
+--- a/laravel-app/resources/views/login.blade.php
++++ b/laravel-app/resources/views/login.blade.php
+@@ -2,6 +2,7 @@
+ @section('content')
+ <h1>Log masuk</h1>
+ <form method="post" action="/login">
++    @csrf
+     <input name="username" placeholder="Nama pengguna"> <input name="password" type="password" placeholder="Kata laluan"> <button>Masuk</button>
+ </form>
+ @endsection
+diff --git a/laravel-app/resources/views/ping.blade.php b/laravel-app/resources/views/ping.blade.php
+index b74cd41..a884317 100644
+--- a/laravel-app/resources/views/ping.blade.php
++++ b/laravel-app/resources/views/ping.blade.php
+@@ -1,5 +1,5 @@
+ @extends('layout')
+ @section('content')
+-<h1>Ping {!! $host !!}</h1>
+-<pre>{!! $output !!}</pre>
++<h1>Ping {{ $host }}</h1>
++<pre>{{ $output }}</pre>
+ @endsection
+diff --git a/laravel-app/resources/views/search.blade.php b/laravel-app/resources/views/search.blade.php
+index f83136b..5e7a2f2 100644
+--- a/laravel-app/resources/views/search.blade.php
++++ b/laravel-app/resources/views/search.blade.php
+@@ -1,14 +1,13 @@
+ @extends('layout')
+ @section('content')
+-{{-- Sengaja guna {!! !!} (tanpa escape): XSS --}}
+-<h1>Hasil carian untuk: {!! $q !!}</h1>
++<h1>Hasil carian untuk: {{ $q }}</h1>
+ @if($error)
+-<p>Ralat: {!! $error !!}</p>
++<p>Ralat: {{ $error }}</p>
+ @endif
+ <table border="1">
+     <tr><th>ID</th><th>Nama</th><th>Harga (RM)</th></tr>
+     @foreach($rows as $r)
+-    <tr><td>{{ $r->id }}</td><td>{!! $r->name !!}</td><td>{{ number_format($r->price, 2) }}</td></tr>
++    <tr><td>{{ $r->id }}</td><td>{{ $r->name }}</td><td>{{ number_format($r->price, 2) }}</td></tr>
+     @endforeach
+ </table>
+ @endsection
+diff --git a/laravel-app/routes/web.php b/laravel-app/routes/web.php
+index ed08d4a..abbb9d4 100644
+--- a/laravel-app/routes/web.php
++++ b/laravel-app/routes/web.php
+@@ -44,14 +44,18 @@
+ 
+ // Path traversal
+ Route::get('/download', function (Request $request) {
+-    $path = base_path('files/' . $request->query('file'));
++    $path = base_path('files/' . basename((string) $request->query('file')));
+     return file_exists($path)
+         ? response(file_get_contents($path), 200, ['Content-Type' => 'text/plain'])
+         : response('Fail tidak ditemui', 404);
+ });
+ 
+ // Open redirect
+-Route::get('/redirect', fn (Request $request) => redirect($request->query('url')));
++Route::get('/redirect', function (Request $request) {
++    $url = (string) $request->query('url');
++    abort_unless(str_starts_with($url, '/') && ! str_starts_with($url, '//'), 400, 'URL tidak dibenarkan');
++    return redirect($url);
++});
+ 
+ Route::get('/login', fn () => view('login'));
+ 
+@@ -65,7 +69,7 @@
+     }
+     $value = base64_encode($rows[0]->name . ':' . $rows[0]->role);
+     return response('<h1>Selamat datang, ' . $rows[0]->name . '</h1>')
+-        ->withCookie(cookie('session', $value, 60, '/', null, false, false, true));
++        ->withCookie(cookie('session', $value, 60, '/', null, false, true, true));
+ });
+ 
+ // Pengesahan rosak: peranan dipercayai daripada cookie yang boleh dipalsukan klien

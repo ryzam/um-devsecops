@@ -1,0 +1,92 @@
+# Manifest yang dikeraskan untuk aspnet-app (Trek A). Ganti PESERTA dengan nama projek Harbor anda:
+#   sed "s/PESERTA/peserta03/g" aspnet-selamat.yaml | kubectl apply -f -
+# Prasyarat dalam namespace "lab":
+#   secret "harbor" (imagePullSecret) dan secret "aspnet-rahsia" (kunci Jwt__Secret); lihat README.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aspnet-app
+  namespace: lab
+  labels:
+    app: aspnet-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aspnet-app
+  template:
+    metadata:
+      labels:
+        app: aspnet-app
+    spec:
+      automountServiceAccountToken: false   # app tidak perlu bercakap dengan API server
+      imagePullSecrets:
+        - name: harbor
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001         # UID berangka tinggi (> 10000) dan bukan root; app hanya menulis ke volum emptyDir
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          image: harbor.lab.test/PESERTA/aspnet-app:selamat   # tag tetap, bukan :latest
+          imagePullPolicy: IfNotPresent
+          # Sistem fail akar baca sahaja; app menulis app.db ke /data (emptyDir)
+          command: ["dotnet", "/app/AspNetLab.dll"]
+          workingDir: /data
+          ports:
+            - containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          env:
+            - name: Jwt__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: aspnet-rahsia
+                  key: Jwt__Secret
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aspnet-app
+  namespace: lab
+spec:
+  type: ClusterIP          # tidak didedahkan terus ke luar kluster
+  selector:
+    app: aspnet-app
+  ports:
+    - port: 80
+      targetPort: 8080

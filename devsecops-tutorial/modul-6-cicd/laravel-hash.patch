@@ -1,0 +1,34 @@
+diff --git a/laravel-app/database/seeders/DatabaseSeeder.php b/laravel-app/database/seeders/DatabaseSeeder.php
+index 5fc420f..07ed3d9 100644
+--- a/laravel-app/database/seeders/DatabaseSeeder.php
++++ b/laravel-app/database/seeders/DatabaseSeeder.php
+@@ -19,10 +19,10 @@ public function run(): void
+             ['name' => 'Papan kekunci mekanikal', 'price' => 199.00],
+         ]);
+ 
+-        // MD5 untuk kata laluan: sengaja lemah.
++        // Kata laluan di-hash dengan bcrypt (bukan MD5).
+         DB::table('users')->insert([
+-            ['name' => 'admin', 'email' => 'admin@kedai.test', 'password' => md5('admin123'), 'role' => 'admin'],
+-            ['name' => 'alice', 'email' => 'alice@kedai.test', 'password' => md5('kata-laluan-alice'), 'role' => 'user'],
++            ['name' => 'admin', 'email' => 'admin@kedai.test', 'password' => password_hash('admin123', PASSWORD_BCRYPT), 'role' => 'admin'],
++            ['name' => 'alice', 'email' => 'alice@kedai.test', 'password' => password_hash('kata-laluan-alice', PASSWORD_BCRYPT), 'role' => 'user'],
+         ]);
+ 
+         DB::table('guestbook')->insert([
+diff --git a/laravel-app/routes/web.php b/laravel-app/routes/web.php
+index abbb9d4..eb10677 100644
+--- a/laravel-app/routes/web.php
++++ b/laravel-app/routes/web.php
+@@ -62,9 +62,8 @@
+ // SQL injection pada log masuk + MD5 + cookie sesi lemah (tanpa HttpOnly/Secure)
+ Route::post('/login', function (Request $request) {
+     $username = $request->input('username');
+-    $hash = md5((string) $request->input('password'));
+-    $rows = DB::select("SELECT name, role FROM users WHERE name = ? AND password = ?", [$username, $hash]);
+-    if (count($rows) === 0) {
++    $rows = DB::select("SELECT name, role, password FROM users WHERE name = ?", [$username]);
++    if (count($rows) === 0 || ! password_verify((string) $request->input('password'), $rows[0]->password)) {
+         return response('<h1>Log masuk gagal</h1>', 200);
+     }
+     $value = base64_encode($rows[0]->name . ':' . $rows[0]->role);

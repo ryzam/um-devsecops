@@ -1,0 +1,26 @@
+# Dockerfile yang lebih selamat untuk laravel-app (Trek B).
+# Letak di laravel-app/ dan bina dengan:
+#   docker buildx build --provenance=false --sbom=false --load -f Dockerfile.laravel-selamat -t laravel-app:selamat .
+
+# Peringkat 1: pasang dependency (tanpa pakej dev)
+FROM composer:2 AS deps
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --no-scripts --prefer-dist --optimize-autoloader
+
+# Peringkat 2: runtime kecil berasaskan Alpine, tanpa composer atau git
+FROM php:8.4-cli-alpine
+RUN apk add --no-cache iputils curl \
+    && adduser -D -u 10001 aplikasi
+WORKDIR /app
+COPY --from=deps /app/vendor ./vendor
+COPY --chown=aplikasi:aplikasi . .
+RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache database \
+    && touch database/database.sqlite \
+    && chown -R aplikasi:aplikasi storage bootstrap/cache database
+ENV APP_ENV=production APP_DEBUG=false
+USER aplikasi
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 CMD curl -fs http://localhost:8080/up || exit 1
+# APP_KEY dan secret lain dihantar semasa jalan (-e); jika tiada, kunci sementara dijana
+CMD ["sh", "-c", "export APP_KEY=\"${APP_KEY:-$(php artisan key:generate --show)}\"; php artisan migrate --force --seed && exec php artisan serve --host=0.0.0.0 --port=8080"]

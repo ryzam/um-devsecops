@@ -1,0 +1,42 @@
+diff --git a/laravel-app/routes/web.php b/laravel-app/routes/web.php
+index f337cb3..ed08d4a 100644
+--- a/laravel-app/routes/web.php
++++ b/laravel-app/routes/web.php
+@@ -15,7 +15,7 @@
+     $error = null;
+     $rows = [];
+     try {
+-        $rows = DB::select("SELECT id, name, price FROM products WHERE name LIKE '%" . $q . "%'");
++        $rows = DB::select("SELECT id, name, price FROM products WHERE name LIKE ?", ['%' . $q . '%']);
+     } catch (\Throwable $e) {
+         $error = $e->getMessage();
+     }
+@@ -35,7 +35,10 @@
+ // Command injection
+ Route::get('/ping', function (Request $request) {
+     $host = $request->query('host', '127.0.0.1');
+-    $output = shell_exec('ping -c 1 ' . $host . ' 2>&1');
++    if (! preg_match('/^[A-Za-z0-9.\-]{1,253}$/', $host)) {
++        abort(400, 'Nama hos tidak sah');
++    }
++    $output = shell_exec('ping -c 1 ' . escapeshellarg($host) . ' 2>&1');
+     return view('ping', ['host' => $host, 'output' => $output]);
+ });
+ 
+@@ -56,7 +59,7 @@
+ Route::post('/login', function (Request $request) {
+     $username = $request->input('username');
+     $hash = md5((string) $request->input('password'));
+-    $rows = DB::select("SELECT name, role FROM users WHERE name = '" . $username . "' AND password = '" . $hash . "'");
++    $rows = DB::select("SELECT name, role FROM users WHERE name = ? AND password = ?", [$username, $hash]);
+     if (count($rows) === 0) {
+         return response('<h1>Log masuk gagal</h1>', 200);
+     }
+@@ -88,6 +91,6 @@
+ 
+ // Deserialization tidak selamat
+ Route::post('/api/import', function (Request $request) {
+-    $obj = unserialize($request->input('data'));
++    $obj = unserialize($request->input('data'), ['allowed_classes' => false]);
+     return response()->json(['received' => is_object($obj) ? get_class($obj) : gettype($obj)]);
+ });

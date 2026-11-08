@@ -1,0 +1,652 @@
+{
+  "version": "2.0",
+  "summary": {
+    "title": "Kedai Bengkel",
+    "owner": "Bengkel DevSecOps",
+    "description": "Model ancaman app lab Kedai Bengkel (ASP.NET Core dan Laravel). Sengaja rentan, untuk latihan sahaja.",
+    "id": 0
+  },
+  "detail": {
+    "contributors": [],
+    "reviewer": "",
+    "diagrams": [
+      {
+        "id": 0,
+        "title": "Aliran data utama",
+        "diagramType": "STRIDE",
+        "version": "2.0",
+        "thumbnail": "./public/content/images/thumbnail.stride.jpg",
+        "cells": [
+          {
+            "position": {
+              "x": 30,
+              "y": 90
+            },
+            "size": {
+              "width": 160,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Pengguna"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": null
+              }
+            },
+            "shape": "actor",
+            "id": "927402da-231b-5bdf-8a8e-7fce29153aee",
+            "zIndex": 1,
+            "data": {
+              "name": "Pengguna",
+              "description": "",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "providesAuthentication": false
+            }
+          },
+          {
+            "position": {
+              "x": 30,
+              "y": 380
+            },
+            "size": {
+              "width": 160,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Admin"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": null
+              }
+            },
+            "shape": "actor",
+            "id": "7e80a13e-3fe9-5de9-9519-150f033db4f9",
+            "zIndex": 2,
+            "data": {
+              "name": "Admin",
+              "description": "",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "providesAuthentication": true
+            }
+          },
+          {
+            "position": {
+              "x": 360,
+              "y": 230
+            },
+            "size": {
+              "width": 120,
+              "height": 120
+            },
+            "attrs": {
+              "text": {
+                "text": "App Kedai\nBengkel"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": null
+              }
+            },
+            "shape": "process",
+            "id": "b4153a5a-f602-541f-ad47-5b78d7d7083d",
+            "zIndex": 3,
+            "data": {
+              "name": "App Kedai\nBengkel",
+              "description": "",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "1ff11c2c-b23f-5093-9846-df24f2a5ec7a",
+                  "title": "Image atau pakej dirosakkan dalam rantaian bekalan",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "Image asas lama atau pakej pihak ketiga yang dirosakkan memasuki pipeline tanpa disemak. Ancaman ini ada di sekeliling app, bukan dalam rajah asal.",
+                  "mitigation": "Imbasan SCA dan image, kunci versi, tandatangan image dan polisi admission (Modul 3, 4, 6, 7).",
+                  "number": 9
+                }
+              ],
+              "hasOpenThreats": true
+            }
+          },
+          {
+            "position": {
+              "x": 660,
+              "y": 60
+            },
+            "size": {
+              "width": 170,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Pangkalan data SQLite"
+              },
+              "topLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": null
+              },
+              "bottomLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": null
+              }
+            },
+            "shape": "store",
+            "id": "b1f676f9-b8d0-56c5-bbc3-216f0e7f298d",
+            "zIndex": 4,
+            "data": {
+              "name": "Pangkalan data SQLite",
+              "description": "",
+              "type": "tm.Store",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "isALog": false,
+              "storesCredentials": true,
+              "isEncrypted": false,
+              "isSigned": false
+            }
+          },
+          {
+            "position": {
+              "x": 670,
+              "y": 240
+            },
+            "size": {
+              "width": 150,
+              "height": 100
+            },
+            "attrs": {
+              "text": {
+                "text": "Proses OS\nping"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": null
+              }
+            },
+            "shape": "process",
+            "id": "10759350-a833-5be4-929c-e25fd2ae719c",
+            "zIndex": 5,
+            "data": {
+              "name": "Proses OS\nping",
+              "description": "",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 660,
+              "y": 440
+            },
+            "size": {
+              "width": 170,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Sistem fail"
+              },
+              "topLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": null
+              },
+              "bottomLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": null
+              }
+            },
+            "shape": "store",
+            "id": "8524f606-b501-542f-ae4f-b09410017c5b",
+            "zIndex": 6,
+            "data": {
+              "name": "Sistem fail",
+              "description": "",
+              "type": "tm.Store",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "isALog": false,
+              "storesCredentials": true,
+              "isEncrypted": false,
+              "isSigned": false
+            }
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": null
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 7,
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Permintaan pengguna",
+              "description": "",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTP",
+              "isEncrypted": false,
+              "isPublicNetwork": true,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "13da4d8c-3556-5109-b025-553a8a232fe0",
+                  "title": "SQL injection pada log masuk dan carian",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "Input daripada /login dan /search digabung terus dalam query SQL. Penyerang menyuntik admin'-- untuk melepasi log masuk atau membaca jadual users.",
+                  "mitigation": "Query berparameter. Hash kata laluan yang kuat (bukan MD5).",
+                  "number": 1
+                },
+                {
+                  "id": "aa2e7fa6-0968-5962-82ad-00348af52c45",
+                  "title": "XSS pantulan dan tersimpan",
+                  "status": "Open",
+                  "severity": "Medium",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "Input dipaparkan semula tanpa encoding pada /search dan buku pelawat. Skrip penyerang berjalan dalam pelayar pengguna lain.",
+                  "mitigation": "Output encoding. Content-Security-Policy. Token CSRF pada borang.",
+                  "number": 2
+                },
+                {
+                  "id": "a45517e9-8798-5d8b-b8a3-8067b4c278bd",
+                  "title": "Tiada log pengarang buku pelawat",
+                  "status": "Open",
+                  "severity": "Low",
+                  "type": "Repudiation",
+                  "modelType": "STRIDE",
+                  "description": "Tiada rekod siapa menulis entri dalam buku pelawat, jadi penyalahgunaan tidak dapat dikesan atau disangkal.",
+                  "mitigation": "Log audit dengan identiti, masa dan alamat IP.",
+                  "number": 3
+                },
+                {
+                  "id": "2936c9a1-632a-5aaf-bee3-adfb9fac3806",
+                  "title": "IDOR dan hash kata laluan didedahkan",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "/api/users/{id} memulangkan rekod pengguna lain termasuk hash MD5 kata laluan tanpa semakan kebenaran.",
+                  "mitigation": "Semakan kebenaran pada setiap objek. Jangan pulangkan hash dalam API.",
+                  "number": 8
+                }
+              ],
+              "isTrustBoundary": false
+            },
+            "id": "c0fad95d-09d3-5119-ac2d-bba1993bbd0c",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Permintaan pengguna (HTTP)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "927402da-231b-5bdf-8a8e-7fce29153aee"
+            },
+            "target": {
+              "cell": "b4153a5a-f602-541f-ad47-5b78d7d7083d"
+            },
+            "vertices": [
+              {
+                "x": 280,
+                "y": 150
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": null
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 8,
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Permintaan admin",
+              "description": "",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTP",
+              "isEncrypted": false,
+              "isPublicNetwork": true,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "c4a77532-4584-5df7-86ab-a17e0e26673d",
+                  "title": "Cookie sesi boleh dipalsukan",
+                  "status": "Open",
+                  "severity": "Critical",
+                  "type": "Spoofing",
+                  "modelType": "STRIDE",
+                  "description": "Cookie session hanyalah nama:peranan dalam base64. Sesiapa sahaja boleh membina cookie admin.",
+                  "mitigation": "Sesi ditandatangani atau disulitkan di server. Jangan percayakan peranan daripada klien.",
+                  "number": 4
+                },
+                {
+                  "id": "ffb4f332-5494-5ec1-9660-57b0203cc29f",
+                  "title": "Pengguna biasa naik taraf kepada admin",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "Peranan diambil daripada cookie dan mass assignment pada /api/profile membenarkan role=admin.",
+                  "mitigation": "Semak kebenaran di server. Senarai medan yang dibenarkan sahaja (allow-list).",
+                  "number": 5
+                }
+              ],
+              "isTrustBoundary": false
+            },
+            "id": "792af0b0-518a-59f9-8a63-029133570973",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Permintaan admin (HTTP)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "7e80a13e-3fe9-5de9-9519-150f033db4f9"
+            },
+            "target": {
+              "cell": "b4153a5a-f602-541f-ad47-5b78d7d7083d"
+            },
+            "vertices": [
+              {
+                "x": 280,
+                "y": 420
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": null
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 9,
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Query SQL",
+              "description": "",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "SQLite",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "hasOpenThreats": false,
+              "threats": [],
+              "isTrustBoundary": false
+            },
+            "id": "0e163f94-df9d-5e05-9b16-b26415a71124",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Query SQL (SQLite)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "b4153a5a-f602-541f-ad47-5b78d7d7083d"
+            },
+            "target": {
+              "cell": "b1f676f9-b8d0-56c5-bbc3-216f0e7f298d"
+            },
+            "vertices": [
+              {
+                "x": 560,
+                "y": 110
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": null
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Arahan ping",
+              "description": "",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "shell",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "cf821b7e-5303-50d5-a650-2c0c11e68aa7",
+                  "title": "Command injection pada /ping",
+                  "status": "Open",
+                  "severity": "Critical",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "Parameter host dihantar ke shell. Penyerang menyambung arahan (;id) dan ia dijalankan sebagai root dalam kontena.",
+                  "mitigation": "Jangan guna shell, hantar senarai hujah. Validasi input. Jalankan sebagai pengguna bukan root.",
+                  "number": 6
+                }
+              ],
+              "isTrustBoundary": false
+            },
+            "id": "9832890a-ec49-5293-894f-cf6b6da225b3",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Arahan ping (shell)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "b4153a5a-f602-541f-ad47-5b78d7d7083d"
+            },
+            "target": {
+              "cell": "10759350-a833-5be4-929c-e25fd2ae719c"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": null
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 11,
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Baca fail",
+              "description": "",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "sistem fail",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "hasOpenThreats": true,
+              "threats": [
+                {
+                  "id": "fb2e7b99-c024-5e16-86df-e028c238530e",
+                  "title": "Path traversal pada /download",
+                  "status": "Open",
+                  "severity": "High",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "Parameter file tidak dinormalisasi. ../appsettings.json atau ../.env mendedahkan rahsia konfigurasi.",
+                  "mitigation": "Normalisasi laluan dan semak ia kekal dalam folder files. Senarai putih nama fail.",
+                  "number": 7
+                }
+              ],
+              "isTrustBoundary": false
+            },
+            "id": "696ad771-9dfa-5eea-aec2-1a6d373f5e0f",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Baca fail (sistem fail)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "b4153a5a-f602-541f-ad47-5b78d7d7083d"
+            },
+            "target": {
+              "cell": "8524f606-b501-542f-ae4f-b09410017c5b"
+            },
+            "vertices": [
+              {
+                "x": 560,
+                "y": 480
+              }
+            ]
+          },
+          {
+            "shape": "trust-boundary-curve",
+            "attrs": {
+              "line": {
+                "targetMarker": "",
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 12,
+            "connector": "smooth",
+            "labels": [
+              {
+                "attrs": {
+                  "text": {
+                    "text": "Sempadan server"
+                  }
+                }
+              }
+            ],
+            "data": {
+              "type": "tm.Boundary",
+              "name": "Sempadan server",
+              "description": "",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            },
+            "id": "6fe4244b-4689-5897-ac6f-8e51e9ba2e09",
+            "source": {
+              "x": 290,
+              "y": 20
+            },
+            "target": {
+              "x": 290,
+              "y": 520
+            },
+            "vertices": [
+              {
+                "x": 290,
+                "y": 270
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "diagramTop": 1,
+    "threatTop": 9
+  }
+}

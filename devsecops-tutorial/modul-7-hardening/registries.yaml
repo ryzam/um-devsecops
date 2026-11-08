@@ -1,0 +1,7 @@
+# Konfigurasi registry untuk k3d: node kluster mempercayai CA lab apabila menarik imej daripada Harbor.
+# ca.crt dipasang ke dalam node melalui bendera --volume semasa mencipta kluster.
+# Kelayakan (kata laluan) TIDAK diletakkan di sini; gunakan imagePullSecret dalam namespace app.
+configs:
+  "harbor.lab.test":
+    tls:
+      ca_file: /etc/ssl/certs/lab-ca.crt

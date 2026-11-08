@@ -1,0 +1,28 @@
+# Dockerfile yang lebih selamat untuk aspnet-app (Trek A).
+# Letak di aspnet-app/ dan bina dengan:
+#   docker buildx build --provenance=false --sbom=false --load -f Dockerfile.aspnet-selamat -t aspnet-app:selamat .
+
+# Peringkat 1: bina dengan SDK (tidak dihantar ke produksi)
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+COPY AspNetLab.csproj packages.lock.json ./
+RUN dotnet restore
+COPY . .
+RUN dotnet publish -c Release -o /out --no-restore
+
+# Peringkat 2: runtime sahaja (lebih kecil, tiada SDK, tiada alat binaan)
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
+RUN apt-get update \
+    && apt-get -y --no-install-recommends upgrade \
+    && apt-get install -y --no-install-recommends iputils-ping curl \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+# Pengguna "app" sudah wujud dalam imej .NET; app menulis app.db dalam /app
+COPY --from=build --chown=app:app /out .
+RUN chown app:app /app
+ENV ASPNETCORE_URLS=http://+:8080
+# Tiada secret dalam imej: Jwt__Secret dihantar semasa jalan (-e)
+USER app
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 CMD curl -fs http://localhost:8080/ || exit 1
+ENTRYPOINT ["dotnet", "AspNetLab.dll"]
