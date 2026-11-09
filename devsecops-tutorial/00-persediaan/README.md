@@ -215,7 +215,11 @@ curl -s -o /dev/null -w "GitLab: %{http_code}\n" https://gitlab.lab.test:8929/us
 
 > Jalankan semakan ini dan semua arahan `curl` dan `git` dalam tutorial di **terminal Ubuntu (WSL)**, bukan PowerShell. `curl.exe` dan Git for Windows (Schannel) memeriksa pembatalan sijil dan gagal dengan `CERT_TRUST_REVOCATION_STATUS_UNKNOWN` terhadap sijil CA lab, yang tidak mempunyai maklumat pembatalan. Pelayar tidak terkesan.
 
-Anda mesti melihat `"status":"healthy"`, `Login Succeeded` dan `GitLab: 200`. Kemudian buka <https://gitlab.lab.test:8929> dalam pelayar dan log masuk sebagai `pesertaNN`; anda akan melihat projek `devsecops-lab`. Jika `GitLab` tidak menjawab 200 sedangkan Harbor berfungsi, port 8929 mungkin disekat oleh rangkaian anda: beritahu instruktur. Jika `docker login` memberi `x509: certificate signed by unknown authority`:
+Anda mesti melihat `"status":"healthy"`, `Login Succeeded` dan `GitLab: 200`. Kemudian buka <https://gitlab.lab.test:8929> dalam pelayar dan log masuk sebagai `pesertaNN`; anda akan melihat projek `devsecops-lab`. Jika `GitLab` tidak menjawab 200 sedangkan Harbor berfungsi, port 8929 mungkin disekat oleh rangkaian anda: beritahu instruktur.
+
+> **Log masuk GitLab memberi `422: The change you requested was rejected`?** Itu ralat token CSRF: pelayar menghantar borang yang tidak sepadan dengan kuki sesinya, dan kata laluan anda tidak disemak lagi. Muat semula halaman log masuk dan log masuk dengan segera (jangan guna halaman yang sudah lama terbuka), cuba **tetingkap InPrivate**, atau padam kuki untuk `gitlab.lab.test`. Gunakan **nama** `https://gitlab.lab.test:8929` (bukan alamat IP) selepas CA lab dipercayai, dan jangan campur kedua-duanya dalam pelayar yang sama. Pelayar Firefox memerlukan CA diimport dalam stornya sendiri (lihat catatan Persediaan 4b).
+
+Jika `docker login` memberi `x509: certificate signed by unknown authority`:
 
 - Pastikan Docker Desktop sudah di-restart selepas import sijil.
 - Cadangan terakhir: **Docker Desktop → Settings → Docker Engine**, tambah `"insecure-registries": ["harbor.lab.test"]`, kemudian **Apply & restart**. Ini melangkau pengesahan sijil dan hanya wajar untuk makmal ini.
