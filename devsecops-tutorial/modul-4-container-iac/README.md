@@ -50,6 +50,57 @@ Setiap pakej yang tidak perlu semasa app berjalan hanya menambah **permukaan ser
 | **Kemas kini pakej OS** semasa binaan | Menutup kerentanan yang sudah ada pembaikan |
 | **Kunci versi imej asas** (tag tepat atau digest) | Binaan boleh diulang; tiada perubahan senyap |
 
+### Empat alat IaC, empat peranan
+
+*Infrastructure as Code* (IaC) bermaksud infrastruktur ditulis sebagai fail: Dockerfile, manifest Kubernetes, Terraform. Alat IaC membaca fail itu dan menyemaknya terhadap senarai peraturan **sebelum** apa-apa dideploy, tanpa menjalankan app. Dalam bengkel ini kita guna empat alat. Mereka bertindih, tetapi tidak sama:
+
+| Alat | Sasaran | Cara kerja | Contoh ID semakan | Kelebihan |
+|---|---|---|---|---|
+| **hadolint** | Dockerfile sahaja | Menghurai Dockerfile, dan menjalankan ShellCheck pada baris `RUN` | `DL3008` | Terbaik untuk gaya Dockerfile dan skrip shell di dalamnya |
+| **Trivy config** | Dockerfile, Kubernetes, Terraform, CloudFormation, Helm | Enjin peraturan dalam Trivy | `DS-0002` (Docker), `KSV-0014` (K8s) | Alat yang sama dengan imbasan imej dan kod: tiada alat tambahan |
+| **Checkov** | Terraform, CloudFormation, Kubernetes, Dockerfile, ARM, Bicep, Ansible, GitHub Actions dan lain-lain | Peraturan sebagai kod (Python), kira-kira 8,000 semakan dalam v3.4.3 | `CKV_DOCKER_3`, `CKV2_K8S_6` | Paling luas, terutamanya untuk Terraform dan awan; ada semakan merentas sumber |
+| **kube-linter** | Kubernetes dan Helm | Semakan keselamatan dan amalan baik untuk manifest | `env-var-secret` | Tumpuan sempit, mesej jelas |
+
+Jumlah semakan Checkov v3.4.3 mengikut sasaran: Terraform 4,642, CloudFormation 1,685, Kubernetes 932, Dockerfile 38. Ini menjelaskan kenapa Checkov bernilai untuk Terraform tetapi tidak jauh lebih banyak daripada Trivy untuk satu Dockerfile.
+
+#### Mengenali Checkov
+
+**Checkov** ialah alat sumber terbuka yang dibangunkan oleh Bridgecrew (kini sebahagian daripada Prisma Cloud, Palo Alto Networks). Ia berjalan sebagai kontena dalam `alat.sh`, tanpa akaun. Berikut keluaran bagi Dockerfile ujian tiga baris (`FROM ubuntu:22.04`, `RUN apt-get update`, `CMD`) yang tiada `USER` dan `HEALTHCHECK`. Arahan yang sama kita gunakan dalam Makmal 4.2, dengan `-d aspnet-app` atau `-d laravel-app`. Keluaran dipendekkan kepada satu daripada tiga temuan:
+
+```bash
+checkov -d . --framework dockerfile --compact --quiet
+```
+
+```text
+dockerfile scan results:
+
+Passed checks: 20, Failed checks: 3, Skipped checks: 0
+
+Check: CKV_DOCKER_3: "Ensure that a user for the container has been created"
+	FAILED for resource: /Dockerfile.
+	File: /Dockerfile:1-3
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/docker-policies/docker-policy-index/ensure-that-a-user-for-the-container-has-been-created
+```
+
+Cara membaca keluaran:
+
+- **`Passed checks: 20, Failed checks: 3`**: ringkasan. Hanya yang **gagal** yang perlu anda tindak.
+- **`CKV_DOCKER_3`**: ID semakan. `CKV` ialah Checkov, `DOCKER` ialah sasarannya, dan `3` ialah nombor semakan. Nama ID yang sama boleh dicari dalam dokumentasi. ID berbentuk **`CKV2_...`** ialah semakan *graf* yang melihat hubungan antara beberapa sumber, contohnya `CKV2_K8S_6` yang menyemak sama ada namespace mempunyai NetworkPolicy.
+- **`File: /Dockerfile:1-3`**: fail dan baris yang terlibat.
+- **`Guide`**: pautan yang menerangkan kenapa semakan itu wujud dan cara membaikinya.
+
+Tiga bendera yang akan anda gunakan dalam makmal:
+
+| Bendera | Fungsi |
+|---|---|
+| `-d <folder>` | Imbas semua fail IaC dalam folder |
+| `--framework dockerfile` (atau `kubernetes`, `terraform`) | Hadkan kepada satu jenis fail. Tanpa bendera ini Checkov mencuba semua jenis yang dikenalinya |
+| `--compact --quiet` | Jangan papar blok kod, dan papar yang gagal sahaja |
+
+Untuk mengecualikan satu semakan yang anda putuskan tidak relevan, gunakan `--skip-check CKV_K8S_15`. Lakukan ini hanya selepas membuat keputusan sedar, dan catat sebabnya, kerana banyak baki Checkov ialah amalan lanjutan yang bergantung pada konteks app anda.
+
+**Bila guna yang mana?** Untuk Dockerfile, hadolint menangkap isu gaya yang dua lagi terlepas, manakala Trivy config dan Checkov menangkap isu keselamatan seperti tiada `USER`. Untuk Kubernetes, kube-linter ringkas dan jelas, dan Checkov paling banyak semakan. Untuk **Terraform**, Checkov dan Trivy config ialah pilihan utama. Kerana tiada satu pun menangkap segala-galanya, Makmal 4.2 membandingkan ketiga-tiganya pada fail yang sama.
+
 ### Harbor
 
 **Harbor** ialah registry kontena sumber terbuka. Ciri yang kita guna:
@@ -81,7 +132,7 @@ Empat perkara yang perlu diingat:
 
 1. **Skop.** Trivy di Harbor tidak memeriksa kod sumber, manifest K8s atau Terraform. Imbasan `fs` dan `config` hanya boleh dibuat di laptop atau CI.
 2. **Pintu yang berbeza.** Dalam pipeline (Modul 6), Trivy imej menggagalkan job pada `CRITICAL` **sebelum** `docker push`. Harbor menyekat pada `High` **selepas** imej sampai. Maka imej `High` boleh masuk ke Harbor, tetapi tiada sesiapa boleh menariknya.
-3. **Keputusan boleh berbeza.** Imej yang sama boleh memberi bilangan temuan berlainan di laptop dan di Harbor kerana pangkalan data kerentanan dikemas kini pada masa yang berbeza, dan versi Trivy dalam Harbor tidak semestinya v0.76.2.
+3. **Keputusan boleh berbeza.** Imej yang sama boleh memberi bilangan temuan berlainan di laptop dan di Harbor kerana pangkalan data kerentanan dikemas kini pada masa yang berbeza, dan versi Trivy berbeza: Harbor 2.15.4 membawa Trivy v0.75.0 (disemak pada server lab), manakala laptop anda menggunakan v0.76.2.
 4. **Harbor ialah kawalan yang tidak boleh dielak.** Imbasan di laptop boleh dilangkau oleh pembangun, tetapi polisi Harbor menyekat imej berisiko semasa `pull` tanpa mengira bagaimana imej itu sampai ke sana.
 
 Ringkasnya, Trivy di laptop ialah alat untuk **menyiasat** (luas, pantas, fleksibel), dan Trivy di Harbor ialah **pintu terakhir** bagi imej (sempit, automatik, mengikat).
