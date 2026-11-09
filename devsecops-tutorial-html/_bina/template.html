@@ -184,6 +184,10 @@ details.file pre{max-height:520px}
 .fsize{color:var(--muted);flex:none;font-variant-numeric:tabular-nums}
 details:not(.file){border:1px solid var(--line);border-radius:8px;padding:8px 14px;margin:.8em 0;background:var(--surface)}
 details:not(.file) summary{cursor:pointer;font-weight:600}
+details.pilihan{border-left:3px solid var(--acc);padding:10px 16px}
+details.pilihan>summary{display:flex;align-items:center;gap:10px;font-size:1rem}
+details.pilihan>summary::before{content:"Pilihan";font:600 .68rem var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--acc);color:var(--acc)}
+details.pilihan[open]>summary{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
 @media (max-width: 900px){
   .layout,html[data-nav="closed"] .layout{padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
   .nav-toggle{display:none}
@@ -311,6 +315,11 @@ details:not(.file) summary{cursor:pointer;font-weight:600}
     if(typeof fillSel==='function')fillSel()}
   setTrek(tr);
   document.addEventListener('change',function(e){if(e.target.name==='trek')setTrek(e.target.value)});
+  // buka bahagian lipat (details) yang mengandungi sasaran pautan, supaya pautan dalam ke dalamnya berfungsi
+  function bukaInduk(){var h=decodeURIComponent(location.hash.slice(1));if(!h)return;var e=document.getElementById(h);
+    var ada=false;while(e){if(e.tagName==='DETAILS'&&!e.open){e.open=true;ada=true}e=e.parentElement}
+    if(ada){var t=document.getElementById(h);if(t)t.scrollIntoView()}}
+  window.addEventListener('hashchange',bukaInduk);bukaInduk();
   // pemilih platform CI
   var CK='bengkel-devsecops-ci',ci='semua';
   try{ci=localStorage.getItem(CK)||'semua'}catch(e){}

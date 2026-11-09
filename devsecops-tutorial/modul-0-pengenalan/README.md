@@ -79,7 +79,7 @@ Elemen DFD: **entiti luar** (pengguna), **proses** (app), **simpanan data** (DB,
 
 **Tujuan.** Menjana senarai ancaman daripada DFD sebelum melihat satu pun hasil imbasan.
 
-**Masa.** 60 minit, berpasangan: bahagian A (jadual) 30 minit, bahagian B (Threat Dragon) 30 minit.
+**Masa.** Bahagian A (jadual ancaman), berpasangan: 30 minit. Bahagian B (Threat Dragon) ialah **pilihan** dan memerlukan kira-kira 30 minit tambahan: lakukan jika masa mengizinkan, atau selepas bengkel.
 
 ### Bahagian A: jadual ancaman
 
@@ -116,11 +116,14 @@ Soalan panduan:
 Perhatikan bahawa kebanyakan baris ini akan muncul semula sebagai temuan imbasan dalam modul seterusnya. Threat model memberi anda **bahasa** untuk menilai temuan itu.
 </details>
 
-### Bahagian B: masukkan ke OWASP Threat Dragon
+### Bahagian B (Pilihan): masukkan ke OWASP Threat Dragon
 
-[OWASP Threat Dragon](https://www.threatdragon.com/) ialah alat sumber terbuka untuk melukis DFD dan merekod ancaman bagi setiap unsur. Model disimpan sebagai **satu fail JSON**, jadi ia boleh dimasukkan dalam repo, disemak dalam pull request dan dikemas kini apabila reka bentuk berubah. Inilah maksud "threat model sebagai kod".
+Bahagian ini **pilihan**. Anda boleh terus ke Makmal 0.2 tanpanya, dan kembali kemudian. Jadual di bahagian A dan Threat Dragon menghasilkan maklumat yang sama; Threat Dragon hanya menyimpannya sebagai fail yang boleh disemak dalam git.
 
-> Alat ini **pilihan**. Jika pemasangan gagal, siapkan bahagian A sahaja; jadual dan Threat Dragon menghasilkan maklumat yang sama.
+<details class="pilihan" markdown="1">
+<summary>Tunjuk Bahagian B: OWASP Threat Dragon (pilihan, ≈ 30 minit)</summary>
+
+[OWASP Threat Dragon](https://www.threatdragon.com/) ialah alat sumber terbuka untuk melukis DFD dan merekod ancaman bagi setiap unsur. Model disimpan sebagai **satu fail JSON**, jadi ia boleh dimasukkan dalam repo, disemak dalam pull request dan dikemas kini apabila reka bentuk berubah. Inilah maksud "threat model sebagai kod". Jika pemasangan gagal, siapkan bahagian A sahaja.
 
 **Langkah 1: simpan fail model dalam satu folder.** Model ialah dua fail JSON. Fail pertama, `kedai-bengkel-kosong.json` (rajah tanpa ancaman, untuk anda isi), dipaparkan di bawah. Fail kedua, `kedai-bengkel-jawapan.json` (kunci jawapan), ada dalam bahagian **Fail modul** di hujung modul ini dan anda menggunakannya pada akhir latihan supaya jawapan tidak kelihatan lebih awal.
 
@@ -170,6 +173,7 @@ Kemudian buka `kedai-bengkel-jawapan.json` dalam Threat Dragon dengan butang **O
 
 > Nama jenis dan butang di atas diambil daripada dokumentasi rasmi Threat Dragon 2.x. Antara muka boleh berbeza sedikit mengikut versi.
 
+</details>
 
 ---
 
