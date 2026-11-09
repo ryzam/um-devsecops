@@ -387,7 +387,7 @@ Soalan:
 
 Terraform paling serius: **kumpulan keselamatan membenarkan SSH daripada `0.0.0.0/0`** dan **pangkalan data awam tanpa penyulitan dengan kata laluan dalam kod**. Dalam STRIDE: Information disclosure (data DB boleh dibaca) dan Elevation of privilege (SSH dibuka kepada dunia).
 
-Secret dalam `env` manifest K8s: hanya **kube-linter** (`env-var-secret`) yang menegurnya, dan hanya bagi pemboleh ubah yang namanya mengandungi `secret`/`password` (ia menangkap `Jwt__Secret` tetapi bukan `PAYMENT_API_KEY`). Gitleaks lalai dan Trivy tidak menangkapnya; peraturan tersuai Modul 1 menangkap kedua-duanya.
+Secret dalam `env` manifest K8s: hanya **kube-linter** (`env-var-secret`) yang menegurnya, dan hanya bagi pemboleh ubah yang namanya mengandungi `secret`/`password` (ia menangkap `Jwt__Secret` tetapi bukan `PAYMENT_API_KEY`). Gitleaks lalai dan Trivy tidak menangkapnya; peraturan custom Modul 1 menangkap kedua-duanya.
 </details>
 
 Kini baiki Terraform. Simpan `main-selamat.tf` (bahagian **Fail modul**), gantikan fail asal, dan imbas semula:

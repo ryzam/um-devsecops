@@ -6,7 +6,7 @@ Dalam modul ini anda akan:
 
 1. Faham kenapa secret yang pernah di-commit kekal dalam sejarah git walaupun fail sudah dipadam.
 2. Menjalankan **Gitleaks** pada working tree dan pada sejarah git, dan membaca hasilnya.
-3. Menulis **peraturan tersuai** untuk menangkap secret yang peraturan lalai terlepas.
+3. Menulis **peraturan custom** untuk menangkap secret yang peraturan lalai terlepas.
 4. Membandingkan dengan pengimbas secret **Trivy** dan memahami titik buta setiap alat.
 5. Memasang **pre-commit hook** yang menghalang secret daripada di-commit.
 6. Mengeluarkan secret daripada kod, menggunakan **baseline** untuk temuan lama, dan mengikut urutan tindak balas apabila secret bocor.
@@ -32,7 +32,7 @@ ls
 | 2:00 – 2:30 | Teori: jenis secret, cara pengesanan, kenapa sejarah git penting |
 | 2:30 – 3:15 | Makmal 1.1 dan 1.2: imbas working tree dan sejarah |
 | 3:15 – 3:30 | Rehat |
-| 3:30 – 4:00 | Makmal 1.3 dan 1.4: peraturan tersuai, bandingkan Trivy |
+| 3:30 – 4:00 | Makmal 1.3 dan 1.4: peraturan custom, bandingkan Trivy |
 | 4:00 – 4:40 | Makmal 1.5 dan 1.6: pre-commit, baiki, baseline |
 | 4:40 – 5:00 | Secrets management dan semakan |
 
@@ -144,7 +144,7 @@ Secret itu **tidak selamat**. Sesiapa yang klon repo boleh melihatnya dengan `gi
 
 ---
 
-## Makmal 1.3: Peraturan tersuai
+## Makmal 1.3: Peraturan custom
 
 **Tujuan.** Menangkap secret yang peraturan lalai terlepas.
 
@@ -278,7 +278,7 @@ git commit -m "Tambah konfigurasi"; echo "exit=$?"
 
 Anda mesti melihat `leaks found: 1` dan `exit=1`. Commit **disekat**: `git log --oneline` hanya menunjukkan `Commit awal`, dan `git status --short` menunjukkan `A  .env` (dipentaskan, belum di-commit).
 
-Perhatikan **satu sahaja** ditemui. Peraturan lalai menandakan `API_KEY` (peraturan `generic-api-key`) tetapi tidak `DB_PASSWORD`. Kata laluan biasa tanpa corak yang dikenali sering terlepas, dan itulah sebab hook bukan satu-satunya pertahanan, dan sebab Makmal 1.3 mengajar peraturan tersuai.
+Perhatikan **satu sahaja** ditemui. Peraturan lalai menandakan `API_KEY` (peraturan `generic-api-key`) tetapi tidak `DB_PASSWORD`. Kata laluan biasa tanpa corak yang dikenali sering terlepas, dan itulah sebab hook bukan satu-satunya pertahanan, dan sebab Makmal 1.3 mengajar peraturan custom.
 
 **Pembetulan yang betul:** `.env` tidak masuk git. Simpan templat tanpa nilai, dan abaikan `.env`:
 
@@ -533,7 +533,7 @@ Peraturan ringkas: **jangan hantar secret, hantar identiti**. Bila boleh, gantik
 ## Senarai semak Modul 1
 
 - [ ] Saya menjalankan `gitleaks dir` dan `gitleaks git` dan faham bezanya
-- [ ] Saya melihat peraturan lalai terlepas YAML K8s, dan peraturan tersuai menangkapnya
+- [ ] Saya melihat peraturan lalai terlepas YAML K8s, dan peraturan custom menangkapnya
 - [ ] Saya tahu kenapa Trivy `secret` tidak menemui secret lab tetapi `trivy config` menegur Dockerfile
 - [ ] Pre-commit hook saya menghalang commit yang mengandungi secret
 - [ ] Saya mengeluarkan secret daripada kod dan `gitleaks dir` melaporkan `no leaks found`

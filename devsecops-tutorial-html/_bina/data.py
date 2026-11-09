@@ -113,7 +113,7 @@ FLAWS = [
       trivy=(OK, "21 temuan setiap fail (KSV-*)."), checkov=(OK, "21 kegagalan setiap fail."),
       kubelinter=(OK, "10 (aspnet) dan 9 (laravel): docker-sock, host-network, privileged-container, latest-tag dll.")),
     F("I4", "x", "K8s: secret dalam env", "name/value pada baris berasingan.",
-      gitleaks=(NO, "Peraturan lalai terlepas; peraturan tersuai menangkapnya."), trivy=(NO, "Tidak menegur."),
+      gitleaks=(NO, "Peraturan lalai terlepas; peraturan custom menangkapnya."), trivy=(NO, "Tidak menegur."),
       checkov=(NO, "Tidak menegur."), kubelinter=(OK, "env-var-secret menangkap Jwt__Secret tetapi bukan PAYMENT_API_KEY (bergantung pada nama).")),
     F("I5", "x", "Terraform: S3 awam, SSH terbuka, RDS awam tanpa penyulitan", "terraform/main.tf.",
       trivy=(OK, "18 temuan, AWS-0104 CRITICAL."), checkov=(OK, "21 kegagalan + CKV_SECRET_6."),
