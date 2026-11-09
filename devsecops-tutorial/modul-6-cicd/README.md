@@ -310,7 +310,7 @@ Soalan:
 
 <div class="ci ci-gl" markdown="1">
 
-Simpan `gitlab-ci.yml` (bahagian **Fail modul**) sebagai `.gitlab-ci.yml` di akar repo, dan tolak:
+Simpan `gitlab-ci.yml` (bahagian **Fail modul**) sebagai `.gitlab-ci.yml` di akar repo, dan tolak. Fail ini **menggantikan** fail ringkas dengan satu job `sast` yang anda cipta dalam Makmal 2.8: job `sast` yang sama kini bersama tiga job imbasan lain dan job `imej`, dan pengecualian `--exclude Dockerfile` dibuang kerana Dockerfile sudah dibaiki dalam Modul 4.
 
 ```bash
 cp gitlab-ci.yml .gitlab-ci.yml   # atau simpan terus dengan nama itu

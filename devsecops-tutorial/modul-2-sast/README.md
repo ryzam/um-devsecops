@@ -9,8 +9,9 @@ Dalam modul ini anda akan:
 3. Mengenal pasti kelemahan yang SAST **terlepas**, dan memadankannya dengan threat model anda.
 4. Membaiki SQL injection, command injection dan deserialization, kemudian mengesahkan pembaikan dengan ujian fungsi **dan** imbasan semula.
 5. Mengimbas kod yang dijana AI dan mengaplikasikan **quality gate** serta pengurusan temuan.
+6. Menjalankan Semgrep sebagai pintu dalam **GitLab CI** dan membaca keputusannya.
 
-> Prasyarat: [Modul 1](../modul-1-secret/README.md) siap. Fungsi `semgrep` dalam `alat.sh` berfungsi. App anda berjalan seperti dalam [Modul 0](../modul-0-pengenalan/README.md#makmal-0-2-jalankan-app-lab).
+> Prasyarat: [Modul 1](../modul-1-secret/README.md) siap. Fungsi `semgrep` dalam `alat.sh` berfungsi. App anda berjalan seperti dalam [Modul 0](../modul-0-pengenalan/README.md#makmal-0-2-jalankan-app-lab). Untuk Makmal 2.8, repo anda sudah dihantar ke GitLab (Persediaan 4d).
 
 ## Jadual
 
@@ -21,7 +22,8 @@ Dalam modul ini anda akan:
 | 10:40 – 10:55 | Rehat |
 | 10:55 – 11:35 | Makmal 2.4 dan 2.5: yang terlepas, baiki dan sahkan |
 | 11:35 – 12:30 | Makmal 2.6: kod yang dijana AI |
-| 12:30 – 1:00 | Makmal 2.7: quality gate dan semakan |
+| 12:30 – 12:45 | Makmal 2.7: quality gate dan semakan |
+| 12:45 – 1:00 | Makmal 2.8: SAST dalam GitLab CI |
 
 ---
 
@@ -452,6 +454,121 @@ Letakkan komen sebelum baris yang berkenaan, kemudian imbas semula.
 
 Peraturan: setiap pengecualian perlu ada **alasan** dan, dalam projek sebenar, **tarikh semakan semula**. Pengecualian tanpa alasan ialah hutang keselamatan yang tersembunyi.
 
+---
+
+## Makmal 2.8: SAST dalam GitLab CI
+
+**Tujuan.** Melihat Semgrep berjalan sebagai pintu dalam GitLab CI pada setiap `git push`, dan membaca keputusannya.
+
+<div class="ci ci-gh" markdown="1">
+
+Makmal ini menggunakan GitLab CI. Jika anda memilih GitHub Actions, langkau ke [Modul 6](../modul-6-cicd/README.md), yang menunjukkan job SAST yang sama dalam workflow GitHub.
+
+</div>
+
+<div class="ci ci-gl" markdown="1">
+
+Setakat ini anda menjalankan Semgrep sendiri di laptop. Di sini kita menjalankan arahan yang **sama** (dengan `--severity ERROR --error` daripada Makmal 2.7) di server, supaya tiada commit boleh melepasinya tanpa disemak. Prasyarat: repo anda sudah dihantar ke GitLab (Persediaan 4d), dan perubahan Makmal 2.5 dan 2.7 sudah disimpan dalam folder repo.
+
+**Langkah 1: cipta fail pipeline.** Dari akar repo:
+
+<div class="trk trk-a" markdown="1">
+
+```bash
+cat > .gitlab-ci.yml <<'EOF'
+stages: [imbas]
+
+sast:
+  stage: imbas
+  image: { name: "semgrep/semgrep:1.183.0", entrypoint: [""] }
+  variables:
+    APP_DIR: aspnet-app
+    SEMGREP_SEND_METRICS: "off"
+  script:
+    - semgrep scan --quiet --config p/default --config p/gitlab --config p/phpcs-security-audit --severity ERROR --error --exclude Dockerfile "$APP_DIR"
+EOF
+```
+
+</div>
+
+<div class="trk trk-b" markdown="1">
+
+```bash
+cat > .gitlab-ci.yml <<'EOF'
+stages: [imbas]
+
+sast:
+  stage: imbas
+  image: { name: "semgrep/semgrep:1.183.0", entrypoint: [""] }
+  variables:
+    APP_DIR: laravel-app
+    SEMGREP_SEND_METRICS: "off"
+  script:
+    - semgrep scan --quiet --config p/default --config p/gitlab --config p/phpcs-security-audit --severity ERROR --error --exclude Dockerfile "$APP_DIR"
+EOF
+```
+
+</div>
+
+Perhatikan:
+
+- `image` ialah Semgrep yang sama (v1.183.0) seperti dalam `alat.sh`, jadi keputusan di server dan di laptop sepatutnya sama.
+- `--severity ERROR --error` menjadikan temuan ERROR menggagalkan job (`exit=1`), seperti dalam Makmal 2.7.
+- `--exclude Dockerfile` mengecualikan sementara temuan `missing-user` pada Dockerfile. Ia dibaiki dalam Modul 4, dan Modul 6 membuang pengecualian ini.
+- Job ini ialah job `sast` yang sama dalam pipeline penuh Modul 6.
+
+**Langkah 2: tolak.** Semak dahulu apa yang akan dihantar, kemudian tolak ke GitLab:
+
+```bash
+git status --short
+git add -A
+git commit -m "Tambah SAST dalam GitLab CI"
+git push gitlab main
+```
+
+`git status --short` hanya patut menunjukkan fail kod, tampalan dan `.gitlab-ci.yml`. Jika ada fail rahsia (contohnya `rahsia-ujian.txt`, `.env` atau `cosign.key`), jangan `git add` fail itu: lihat bahagian `.gitignore` dalam Modul 1.
+
+**Langkah 3: lihat pipeline.** Buka `https://gitlab.lab.test:8929/pesertaNN/devsecops-lab/-/pipelines`, klik pipeline paling atas, kemudian job `sast` untuk melihat log. Status `pending` bermakna job menunggu giliran: runner dikongsi dan hanya menjalankan tiga job serentak, jadi dengan ramai peserta ia boleh mengambil masa beberapa minit. **Tunggu, jangan tolak berulang kali.** Pipeline pertama juga lebih lambat kerana runner memuat turun imej Semgrep.
+
+<div class="trk trk-a" markdown="1">
+
+Pipeline mesti **gagal** (`failed`). Log berakhir dengan `ERROR: Job failed: exit code 1`, dan di atasnya anda melihat satu temuan **Blocking**: `gitlab.security_code_scan.SCS0001-1` pada `Process.Start` dalam `Program.cs`. Kod itu sudah selamat (tiada shell, hujah dihantar sebagai senarai, hos disahkan), tetapi peraturan menanda **penggunaan** `Process.Start`. Jika anda belum menerima `SCS0002` dalam Makmal 2.7, anda akan melihat dua temuan.
+
+**Langkah 4: triaj dalam CI.** Ini ialah temuan yang diterima dengan alasan. Letakkan komen di baris sebelum kod yang ditanda dalam `aspnet-app/Program.cs`:
+
+```csharp
+// nosemgrep: gitlab.security_code_scan.SCS0001-1 -- hos disahkan dengan regex, hujah dihantar sebagai senarai
+using var p = Process.Start(psi)!;
+```
+
+Kemudian:
+
+```bash
+git commit -am "Terima SCS0001 dengan alasan"
+git push gitlab main
+```
+
+Pipeline kali ini mesti **lulus** (`passed`, tanda hijau).
+
+</div>
+
+<div class="trk trk-b" markdown="1">
+
+Pipeline mesti **gagal** (`failed`). Log berakhir dengan `ERROR: Job failed: exit code 1`, dan di atasnya anda melihat **tiga temuan `weak-crypto`**: MD5 pada `DatabaseSeeder.php` (dua) dan `routes/web.php` (satu). Jika anda belum menerima `exec-use` dalam Makmal 2.7, anda akan melihat empat.
+
+MD5 untuk kata laluan ialah kelemahan **sebenar**, jadi jangan tutup dengan `nosemgrep`. Ia dibaiki dalam Modul 6 dengan tampalan bcrypt. Untuk sekarang pipeline kekal merah, dan itulah tugas pintu: tiada kod dengan kelemahan sebenar boleh melepasinya.
+
+</div>
+
+**Apa yang anda pelajari:**
+
+- Pintu berjalan **sendiri** pada setiap push. Anda tidak perlu ingat untuk menjalankannya.
+- Keputusan ditentukan oleh **exit code**, dan log menunjukkan fail, baris dan peraturan yang menyebabkan kegagalan.
+- Temuan yang diterima mesti ada **alasan** dalam kod, seperti dalam Makmal 2.7, dan temuan sebenar mesti **dibaiki**, bukan dipadamkan.
+- Pipeline penuh dalam Modul 6 menambah Gitleaks, SCA, IaC dan binaan imej di sekeliling job yang sama.
+
+</div>
+
 ## Senarai semak Modul 2
 
 - [ ] Saya menjalankan Semgrep dan mencatat 7 temuan dengan keterukan masing-masing
@@ -461,6 +578,7 @@ Peraturan: setiap pengecualian perlu ada **alasan** dan, dalam projek sebenar, *
 - [ ] Saya membaiki SQL/command injection dan mengesahkan dengan ujian fungsi **dan** imbasan semula
 - [ ] Saya mengimbas kod yang dijana AI dan menerangkan kenapa saya bertanggungjawab ke atasnya
 - [ ] Saya boleh menjadikan Semgrep pintu dalam pipeline dengan `--error` dan menerima temuan dengan `nosemgrep` beralasan
+- [ ] Saya melihat job `sast` berjalan dalam GitLab CI, gagal pada temuan ERROR, dan (Trek A) lulus selepas triaj beralasan
 
 ## Rujukan
 
