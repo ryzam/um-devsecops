@@ -465,6 +465,33 @@ git clone https://github.com/ryzam/um-devsecops.git
 cd ~/devsecops-lab
 git log --oneline | head -3
 </code></pre></div>
+<p>Isi repo lab:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Folder atau fail</th>
+<th>Apa itu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>aspnet-app/</code></td>
+<td>App ASP.NET Core (Trek A)</td>
+</tr>
+<tr>
+<td><code>laravel-app/</code></td>
+<td>App Laravel (Trek B)</td>
+</tr>
+<tr>
+<td><code>k8s/</code></td>
+<td>Manifest Kubernetes untuk kedua-dua app (diimbas dalam Modul 1, dibaiki dalam Modul 7)</td>
+</tr>
+<tr>
+<td><code>terraform/</code></td>
+<td>Contoh Terraform yang sengaja tidak selamat (diimbas dan dibaiki dalam Modul 4)</td>
+</tr>
+</tbody>
+</table></div>
 <p>Anda mesti melihat sekurang-kurangnya tiga commit. Repo lab mempunyai sejarah git yang sengaja mengandungi secret palsu: <strong>jangan padamkan folder <code>.git</code></strong> dan jangan klon semula dengan <code>--depth 1</code>.</p>
 <p>Semua fail yang tutorial panggil <strong>Fail modul</strong> (tampalan, Dockerfile, manifest, <code>gitlab-ci.yml</code> dan lain-lain) ada juga dalam <code>~/um-devsecops/devsecops-tutorial/modul-*/</code>. Anda boleh menyalinnya dengan <code>cp</code> dan tidak perlu menyalin daripada halaman web, yang mudah menambah hujung baris Windows (CRLF) dan merosakkan skrip serta tampalan.</p>
 <p><strong>Mengemas kini bahan.</strong> Jika instruktur mengumumkan pembetulan pada tutorial atau fail modul, tarik daripada repo tutorial:</p>
@@ -2279,8 +2306,14 @@ docker push harbor.lab.test/$P/laravel-app:uji
 <li>Mengeluarkan secret daripada kod, menggunakan <strong>baseline</strong> untuk temuan lama, dan mengikut urutan tindak balas apabila secret bocor.</li>
 </ol>
 <blockquote>
-<p>Prasyarat: <a href="#persediaan">Persediaan</a> siap, <code>source alat.sh</code> berfungsi, dan anda berada dalam folder repo lab.</p>
+<p>Prasyarat: <a href="#persediaan">Persediaan</a> siap dan <code>source alat.sh</code> berfungsi.</p>
 </blockquote>
+<p>Semua arahan dalam modul ini (dan modul seterusnya) dijalankan dari <strong>akar repo lab</strong>. Mulakan setiap sesi terminal baharu dengan:</p>
+<div class="code"><div class="code-bar"><span>terminal</span><button type="button" class="copy">Salin</button></div><pre><code class="language-bash">cd ~/devsecops-lab
+source alat.sh
+ls
+</code></pre></div>
+<p><code>ls</code> mesti menunjukkan <code>README.md</code>, <code>aspnet-app</code>, <code>k8s</code>, <code>laravel-app</code>, <code>terraform</code> dan <code>alat.sh</code>. Folder <code>k8s/</code> (manifest Kubernetes) dan <code>terraform/</code> ialah sebahagian daripada repo lab yang anda klon, bukan fail yang anda cipta. Jika <code>ls</code> tidak menunjukkannya, anda bukan dalam folder yang betul, atau repo belum diklon (Persediaan 2).</p>
 <h2 id="m1-jadual"><a class="hl" href="#m1-jadual">Jadual</a></h2>
 <div class="tbl"><table>
 <thead>
@@ -2411,7 +2444,7 @@ gitleaks git . --no-banner --no-color --redact=100 -l error -v 2&gt;&amp;1 | gre
 <hr />
 <h2 id="m1-makmal-1-3-peraturan-tersuai"><a class="hl" href="#m1-makmal-1-3-peraturan-tersuai">Makmal 1.3: Peraturan tersuai</a><label class="done-toggle"><input type="checkbox" data-k="m1-makmal-1-3-peraturan-tersuai" data-m="m1"><span>Selesai</span></label></h2>
 <p><strong>Tujuan.</strong> Menangkap secret yang peraturan lalai terlepas.</p>
-<p>Jalankan imbasan pada folder <code>k8s/</code>:</p>
+<p>Folder <code>k8s/</code> ialah manifest Kubernetes dalam repo lab (<code>namespace.yaml</code>, <code>aspnet.yaml</code> dan <code>laravel.yaml</code>). Dari akar repo lab, jalankan imbasan padanya. Jika Gitleaks melapor bahawa <code>k8s</code> tidak wujud, anda bukan dalam <code>~/devsecops-lab</code>:</p>
 <div class="code"><div class="code-bar"><span>terminal</span><button type="button" class="copy">Salin</button></div><pre><code class="language-bash">gitleaks dir k8s --no-banner -l error; echo &quot;exit=$?&quot;
 </code></pre></div>
 <p>Hasilnya <code>exit=0</code>, tiada temuan. Tetapi lihat <code>k8s/aspnet.yaml</code>:</p>

@@ -11,7 +11,17 @@ Dalam modul ini anda akan:
 5. Memasang **pre-commit hook** yang menghalang secret daripada di-commit.
 6. Mengeluarkan secret daripada kod, menggunakan **baseline** untuk temuan lama, dan mengikut urutan tindak balas apabila secret bocor.
 
-> Prasyarat: [Persediaan](../00-persediaan/README.md) siap, `source alat.sh` berfungsi, dan anda berada dalam folder repo lab.
+> Prasyarat: [Persediaan](../00-persediaan/README.md) siap dan `source alat.sh` berfungsi.
+
+Semua arahan dalam modul ini (dan modul seterusnya) dijalankan dari **akar repo lab**. Mulakan setiap sesi terminal baharu dengan:
+
+```bash
+cd ~/devsecops-lab
+source alat.sh
+ls
+```
+
+`ls` mesti menunjukkan `README.md`, `aspnet-app`, `k8s`, `laravel-app`, `terraform` dan `alat.sh`. Folder `k8s/` (manifest Kubernetes) dan `terraform/` ialah sebahagian daripada repo lab yang anda klon, bukan fail yang anda cipta. Jika `ls` tidak menunjukkannya, anda bukan dalam folder yang betul, atau repo belum diklon (Persediaan 2).
 
 ## Jadual
 
@@ -136,7 +146,7 @@ Secret itu **tidak selamat**. Sesiapa yang klon repo boleh melihatnya dengan `gi
 
 **Tujuan.** Menangkap secret yang peraturan lalai terlepas.
 
-Jalankan imbasan pada folder `k8s/`:
+Folder `k8s/` ialah manifest Kubernetes dalam repo lab (`namespace.yaml`, `aspnet.yaml` dan `laravel.yaml`). Dari akar repo lab, jalankan imbasan padanya. Jika Gitleaks melapor bahawa `k8s` tidak wujud, anda bukan dalam `~/devsecops-lab`:
 
 ```bash
 gitleaks dir k8s --no-banner -l error; echo "exit=$?"

@@ -111,6 +111,15 @@ cd ~/devsecops-lab
 git log --oneline | head -3
 ```
 
+Isi repo lab:
+
+| Folder atau fail | Apa itu |
+|---|---|
+| `aspnet-app/` | App ASP.NET Core (Trek A) |
+| `laravel-app/` | App Laravel (Trek B) |
+| `k8s/` | Manifest Kubernetes untuk kedua-dua app (diimbas dalam Modul 1, dibaiki dalam Modul 7) |
+| `terraform/` | Contoh Terraform yang sengaja tidak selamat (diimbas dan dibaiki dalam Modul 4) |
+
 Anda mesti melihat sekurang-kurangnya tiga commit. Repo lab mempunyai sejarah git yang sengaja mengandungi secret palsu: **jangan padamkan folder `.git`** dan jangan klon semula dengan `--depth 1`.
 
 Semua fail yang tutorial panggil **Fail modul** (tampalan, Dockerfile, manifest, `gitlab-ci.yml` dan lain-lain) ada juga dalam `~/um-devsecops/devsecops-tutorial/modul-*/`. Anda boleh menyalinnya dengan `cp` dan tidak perlu menyalin daripada halaman web, yang mudah menambah hujung baris Windows (CRLF) dan merosakkan skrip serta tampalan.
