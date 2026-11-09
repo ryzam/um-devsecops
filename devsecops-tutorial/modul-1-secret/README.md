@@ -250,6 +250,55 @@ git rm -q --cached rahsia-ujian.txt
 rm rahsia-ujian.txt
 ```
 
+### Contoh kedua: fail `.env` dengan kata laluan
+
+Ini senario yang paling biasa: pembangun mencipta `.env` untuk app, dan terus menjalankan `git add .` Kita cuba dalam repo sementara **di luar** repo lab, supaya repo lab anda tidak dikotori:
+
+```bash
+mkdir ~/demo-gitleaks && cd ~/demo-gitleaks
+git init -q -b main
+git config user.name demo && git config user.email demo@lab.test
+cp ~/devsecops-lab/alat.sh . && echo "# app demo" > README.md
+git add . && git commit -qm "Commit awal"
+```
+
+Pasang hook yang sama seperti di atas (`cat > .git/hooks/pre-commit ...` dan `chmod +x`). Kemudian cipta `.env` dengan nilai palsu, dan cuba commit:
+
+```bash
+cat > .env <<'EOF'
+APP_NAME=KedaiBengkel
+DB_HOST=db.internal
+DB_USERNAME=kedai
+DB_PASSWORD=Sup3r$ecretPassw0rd2026
+API_KEY=kd_live_8f3a91c27b6d4e5f9a0b1c2d3e4f5a6b
+EOF
+git add .env
+git commit -m "Tambah konfigurasi"; echo "exit=$?"
+```
+
+Anda mesti melihat `leaks found: 1` dan `exit=1`. Commit **disekat**: `git log --oneline` hanya menunjukkan `Commit awal`, dan `git status --short` menunjukkan `A  .env` (dipentaskan, belum di-commit).
+
+Perhatikan **satu sahaja** ditemui. Peraturan lalai menandakan `API_KEY` (peraturan `generic-api-key`) tetapi tidak `DB_PASSWORD`. Kata laluan biasa tanpa corak yang dikenali sering terlepas, dan itulah sebab hook bukan satu-satunya pertahanan, dan sebab Makmal 1.3 mengajar peraturan tersuai.
+
+**Pembetulan yang betul:** `.env` tidak masuk git. Simpan templat tanpa nilai, dan abaikan `.env`:
+
+```bash
+git reset -q .env
+echo ".env" >> .gitignore
+printf 'APP_NAME=KedaiBengkel\nDB_HOST=db.internal\nDB_USERNAME=kedai\nDB_PASSWORD=\nAPI_KEY=\n' > .env.example
+git add .gitignore .env.example
+git commit -m "Abaikan .env; sediakan .env.example"; echo "exit=$?"
+git ls-files
+```
+
+Kali ini Gitleaks memaparkan `no leaks found` dan `exit=0`. `git ls-files` menunjukkan `.env.example`, `.gitignore`, `README.md` dan `alat.sh`, tanpa `.env`. Fail `.env` masih ada pada cakera untuk app berjalan, tetapi git tidak menjejakinya. Bersihkan:
+
+```bash
+cd ~ && rm -rf ~/demo-gitleaks
+```
+
+> **Hook mesti menggunakan `#!/usr/bin/env bash`.** Dengan `#!/bin/sh`, commit gagal dengan `Syntax error: Bad function name` kerana `alat.sh` mentakrif fungsi bernama `kube-linter`, dan `/bin/sh` pada Ubuntu (dash) tidak membenarkan tanda sempang dalam nama fungsi. Commit itu gagal bukan kerana secret, jadi ralat itu mengelirukan.
+
 > Hook di `.git/hooks/` tidak ikut klon. Dalam pasukan, guna rangka kerja `pre-commit` atau `husky` supaya hook dipasang secara automatik, dan **jangan bergantung padanya semata-mata**: pembangun boleh mengelak dengan `--no-verify`. Imbasan di CI (Modul 6) ialah jaring keselamatan sebenar.
 
 ---
