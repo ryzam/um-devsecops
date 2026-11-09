@@ -572,14 +572,26 @@ printf '[network]\ngenerateHosts = false\n' | sudo tee -a /etc/wsl.conf
 </code></pre></div>
 <p>Baris <code>generateHosts = false</code> menghalang WSL menulis semula <code>/etc/hosts</code> setiap kali ia dimulakan; ia berkuat kuasa selepas <code>wsl --shutdown</code> dari PowerShell. Untuk Linux/macOS biasa, hanya baris pertama diperlukan.</p>
 <h3 id="persediaan-4b-percayai-ca-lab"><a class="hl" href="#persediaan-4b-percayai-ca-lab">4b. Percayai CA lab</a></h3>
-<p>Simpan fail <code>ca.crt</code> (bahagian <strong>Fail modul</strong> di bawah) pada laptop anda. Dalam <strong>PowerShell Administrator</strong>, import ke stor akar Windows (pelayar dan Docker Desktop menggunakannya):</p>
-<div class="code"><div class="code-bar"><span>powershell</span><button type="button" class="copy">Salin</button></div><pre><code class="language-powershell">Import-Certificate -FilePath .\ca.crt -CertStoreLocation Cert:\LocalMachine\Root
+<p>CA lab mesti dipercayai di <strong>tiga tempat</strong>: Windows (pelayar), Ubuntu/WSL (<code>curl</code>, <code>git</code>, <code>cosign</code>) dan daemon Docker Desktop. Jika salah satu terlepas, ia gagal dengan ralat sijil. Fail CA ialah <code>ca.crt</code> dalam klon <code>~/um-devsecops</code> (Bahagian 2).</p>
+<p><strong>1. Salin <code>ca.crt</code> ke Windows.</strong> Dalam terminal Ubuntu:</p>
+<div class="code"><div class="code-bar"><span>terminal</span><button type="button" class="copy">Salin</button></div><pre><code class="language-bash">W=$(wslpath &quot;$(powershell.exe -NoProfile -Command '[Environment]::GetFolderPath(&quot;MyDocuments&quot;)' | tr -d '\r')&quot;)
+cp ~/um-devsecops/devsecops-tutorial/00-persediaan/ca.crt &quot;$W/ca.crt&quot;
 </code></pre></div>
-<p>Kemudian dalam terminal Ubuntu, supaya <code>curl</code> dan alat WSL juga percaya:</p>
-<div class="code"><div class="code-bar"><span>terminal</span><button type="button" class="copy">Salin</button></div><pre><code class="language-bash">sudo cp ca.crt /usr/local/share/ca-certificates/lab-ca.crt
+<p><strong>2. Import ke stor akar Windows</strong> (pelayar dan Docker Desktop menggunakannya). Dalam <strong>PowerShell Administrator</strong>:</p>
+<div class="code"><div class="code-bar"><span>powershell</span><button type="button" class="copy">Salin</button></div><pre><code class="language-powershell">Import-Certificate -FilePath &quot;$([Environment]::GetFolderPath('MyDocuments'))\ca.crt&quot; -CertStoreLocation Cert:\LocalMachine\Root
+</code></pre></div>
+<p><strong>3. Percayai dalam Ubuntu.</strong> Dalam terminal Ubuntu:</p>
+<div class="code"><div class="code-bar"><span>terminal</span><button type="button" class="copy">Salin</button></div><pre><code class="language-bash">sudo cp ~/um-devsecops/devsecops-tutorial/00-persediaan/ca.crt /usr/local/share/ca-certificates/lab-ca.crt
 sudo update-ca-certificates
+curl -s -o /dev/null -w &quot;%{http_code}\n&quot; https://harbor.lab.test/api/v2.0/health
 </code></pre></div>
-<p>Mulakan semula Docker Desktop (klik kanan ikon dulang, <strong>Restart</strong>).</p>
+<p>Baris terakhir mesti mencetak <code>200</code>. <code>sudo</code> meminta <strong>kata laluan Linux</strong> anda, iaitu kata laluan yang anda tetapkan semasa memasang Ubuntu (bukan kata laluan Windows, Harbor atau GitLab). Jika anda terlupa, dalam <strong>PowerShell</strong> tetapkan yang baharu (gantikan <code>NAMA</code> dengan hasil <code>whoami</code> dalam Ubuntu):</p>
+<div class="code"><div class="code-bar"><span>powershell</span><button type="button" class="copy">Salin</button></div><pre><code class="language-powershell">wsl -d Ubuntu -u root passwd NAMA
+</code></pre></div>
+<p><strong>4. Mulakan semula Docker Desktop sepenuhnya.</strong> Docker Desktop mengambil CA daripada stor Windows apabila ia bermula; jika ia sudah berjalan sebelum langkah 2, daemonnya tidak nampak CA itu dan <code>docker login</code> gagal. Klik kanan ikon Docker di dulang dan pilih <strong>Quit Docker Desktop</strong>, kemudian dalam PowerShell:</p>
+<div class="code"><div class="code-bar"><span>powershell</span><button type="button" class="copy">Salin</button></div><pre><code class="language-powershell">wsl --shutdown
+</code></pre></div>
+<p>Mulakan Docker Desktop semula dan tunggu sehingga enjinnya berjalan. Ini menghentikan kontena yang sedang berjalan.</p>
 <p>Tutup semua tetingkap pelayar dan buka semula supaya sijil baharu dikenali. <strong>Edge dan Chrome</strong> menggunakan stor sijil Windows, jadi tiada langkah tambahan. <strong>Firefox</strong> menggunakan stor sijilnya sendiri: import <code>ca.crt</code> di <strong>Settings → Privacy &amp; Security → View Certificates → Authorities → Import</strong>, dan tandakan <em>Trust this CA to identify websites</em>; atau gunakan Edge atau Chrome.</p>
 <h3 id="persediaan-4c-semak"><a class="hl" href="#persediaan-4c-semak">4c. Semak</a></h3>
 <p>Dalam terminal Ubuntu:</p>
@@ -594,9 +606,10 @@ curl -s -o /dev/null -w &quot;GitLab: %{http_code}\n&quot; https://gitlab.lab.te
 <blockquote>
 <p><strong>Log masuk GitLab memberi <code>422: The change you requested was rejected</code>?</strong> Itu ralat token CSRF: pelayar menghantar borang yang tidak sepadan dengan kuki sesinya, dan kata laluan anda tidak disemak lagi. Muat semula halaman log masuk dan log masuk dengan segera (jangan guna halaman yang sudah lama terbuka), cuba <strong>tetingkap InPrivate</strong>, atau padam kuki untuk <code>gitlab.lab.test</code>. Gunakan <strong>nama</strong> <code>https://gitlab.lab.test:8929</code> (bukan alamat IP) selepas CA lab dipercayai, dan jangan campur kedua-duanya dalam pelayar yang sama. Pelayar Firefox memerlukan CA diimport dalam stornya sendiri (lihat catatan Persediaan 4b).</p>
 </blockquote>
-<p>Jika <code>docker login</code> memberi <code>x509: certificate signed by unknown authority</code>:</p>
+<p>Jika <code>docker login</code> memberi <code>x509: certificate signed by unknown authority</code>, tentukan dahulu bahagian mana yang tidak mempercayai CA:</p>
 <ul>
-<li>Pastikan Docker Desktop sudah di-restart selepas import sijil.</li>
+<li><strong><code>curl ... /api/v2.0/health</code> dalam Ubuntu tidak memberi <code>200</code></strong> (ia memberi ralat sijil): Ubuntu belum mempercayai CA. Ulang langkah 3 dalam 4b.</li>
+<li><strong><code>curl</code> memberi <code>200</code> tetapi <code>docker login</code> masih gagal</strong>: daemon Docker Desktop belum mengambil CA daripada Windows. Ulang langkah 4 dalam 4b (<strong>Quit Docker Desktop</strong>, <code>wsl --shutdown</code>, mulakan semula), dan pastikan langkah 2 (import dalam PowerShell Administrator) berjaya.</li>
 <li>Cadangan terakhir: <strong>Docker Desktop → Settings → Docker Engine</strong>, tambah <code>"insecure-registries": ["harbor.lab.test"]</code>, kemudian <strong>Apply &amp; restart</strong>. Ini melangkau pengesahan sijil dan hanya wajar untuk makmal ini.</li>
 </ul>
 <h2 id="persediaan-5-pilih-trek"><a class="hl" href="#persediaan-5-pilih-trek">5. Pilih trek</a></h2>

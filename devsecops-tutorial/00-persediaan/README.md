@@ -197,20 +197,42 @@ Baris `generateHosts = false` menghalang WSL menulis semula `/etc/hosts` setiap 
 
 ### 4b. Percayai CA lab
 
-Simpan fail `ca.crt` (bahagian **Fail modul** di bawah) pada laptop anda. Dalam **PowerShell Administrator**, import ke stor akar Windows (pelayar dan Docker Desktop menggunakannya):
+CA lab mesti dipercayai di **tiga tempat**: Windows (pelayar), Ubuntu/WSL (`curl`, `git`, `cosign`) dan daemon Docker Desktop. Jika salah satu terlepas, ia gagal dengan ralat sijil. Fail CA ialah `ca.crt` dalam klon `~/um-devsecops` (Bahagian 2).
 
-```powershell
-Import-Certificate -FilePath .\ca.crt -CertStoreLocation Cert:\LocalMachine\Root
-```
-
-Kemudian dalam terminal Ubuntu, supaya `curl` dan alat WSL juga percaya:
+**1. Salin `ca.crt` ke Windows.** Dalam terminal Ubuntu:
 
 ```bash
-sudo cp ca.crt /usr/local/share/ca-certificates/lab-ca.crt
-sudo update-ca-certificates
+W=$(wslpath "$(powershell.exe -NoProfile -Command '[Environment]::GetFolderPath("MyDocuments")' | tr -d '\r')")
+cp ~/um-devsecops/devsecops-tutorial/00-persediaan/ca.crt "$W/ca.crt"
 ```
 
-Mulakan semula Docker Desktop (klik kanan ikon dulang, **Restart**).
+**2. Import ke stor akar Windows** (pelayar dan Docker Desktop menggunakannya). Dalam **PowerShell Administrator**:
+
+```powershell
+Import-Certificate -FilePath "$([Environment]::GetFolderPath('MyDocuments'))\ca.crt" -CertStoreLocation Cert:\LocalMachine\Root
+```
+
+**3. Percayai dalam Ubuntu.** Dalam terminal Ubuntu:
+
+```bash
+sudo cp ~/um-devsecops/devsecops-tutorial/00-persediaan/ca.crt /usr/local/share/ca-certificates/lab-ca.crt
+sudo update-ca-certificates
+curl -s -o /dev/null -w "%{http_code}\n" https://harbor.lab.test/api/v2.0/health
+```
+
+Baris terakhir mesti mencetak `200`. `sudo` meminta **kata laluan Linux** anda, iaitu kata laluan yang anda tetapkan semasa memasang Ubuntu (bukan kata laluan Windows, Harbor atau GitLab). Jika anda terlupa, dalam **PowerShell** tetapkan yang baharu (gantikan `NAMA` dengan hasil `whoami` dalam Ubuntu):
+
+```powershell
+wsl -d Ubuntu -u root passwd NAMA
+```
+
+**4. Mulakan semula Docker Desktop sepenuhnya.** Docker Desktop mengambil CA daripada stor Windows apabila ia bermula; jika ia sudah berjalan sebelum langkah 2, daemonnya tidak nampak CA itu dan `docker login` gagal. Klik kanan ikon Docker di dulang dan pilih **Quit Docker Desktop**, kemudian dalam PowerShell:
+
+```powershell
+wsl --shutdown
+```
+
+Mulakan Docker Desktop semula dan tunggu sehingga enjinnya berjalan. Ini menghentikan kontena yang sedang berjalan.
 
 Tutup semua tetingkap pelayar dan buka semula supaya sijil baharu dikenali. **Edge dan Chrome** menggunakan stor sijil Windows, jadi tiada langkah tambahan. **Firefox** menggunakan stor sijilnya sendiri: import `ca.crt` di **Settings → Privacy & Security → View Certificates → Authorities → Import**, dan tandakan *Trust this CA to identify websites*; atau gunakan Edge atau Chrome.
 
@@ -230,9 +252,10 @@ Anda mesti melihat `"status":"healthy"`, `Login Succeeded` dan `GitLab: 200`. Ke
 
 > **Log masuk GitLab memberi `422: The change you requested was rejected`?** Itu ralat token CSRF: pelayar menghantar borang yang tidak sepadan dengan kuki sesinya, dan kata laluan anda tidak disemak lagi. Muat semula halaman log masuk dan log masuk dengan segera (jangan guna halaman yang sudah lama terbuka), cuba **tetingkap InPrivate**, atau padam kuki untuk `gitlab.lab.test`. Gunakan **nama** `https://gitlab.lab.test:8929` (bukan alamat IP) selepas CA lab dipercayai, dan jangan campur kedua-duanya dalam pelayar yang sama. Pelayar Firefox memerlukan CA diimport dalam stornya sendiri (lihat catatan Persediaan 4b).
 
-Jika `docker login` memberi `x509: certificate signed by unknown authority`:
+Jika `docker login` memberi `x509: certificate signed by unknown authority`, tentukan dahulu bahagian mana yang tidak mempercayai CA:
 
-- Pastikan Docker Desktop sudah di-restart selepas import sijil.
+- **`curl ... /api/v2.0/health` dalam Ubuntu tidak memberi `200`** (ia memberi ralat sijil): Ubuntu belum mempercayai CA. Ulang langkah 3 dalam 4b.
+- **`curl` memberi `200` tetapi `docker login` masih gagal**: daemon Docker Desktop belum mengambil CA daripada Windows. Ulang langkah 4 dalam 4b (**Quit Docker Desktop**, `wsl --shutdown`, mulakan semula), dan pastikan langkah 2 (import dalam PowerShell Administrator) berjaya.
 - Cadangan terakhir: **Docker Desktop → Settings → Docker Engine**, tambah `"insecure-registries": ["harbor.lab.test"]`, kemudian **Apply & restart**. Ini melangkau pengesahan sijil dan hanya wajar untuk makmal ini.
 
 ## 5. Pilih trek
