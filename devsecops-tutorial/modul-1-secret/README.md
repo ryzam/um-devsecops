@@ -23,6 +23,8 @@ ls
 
 `ls` mesti menunjukkan `README.md`, `aspnet-app`, `k8s`, `laravel-app`, `terraform` dan `alat.sh`. Folder `k8s/` (manifest Kubernetes) dan `terraform/` ialah sebahagian daripada repo lab yang anda klon, bukan fail yang anda cipta. Jika `ls` tidak menunjukkannya, anda bukan dalam folder yang betul, atau repo belum diklon (Persediaan 2).
 
+> **Gitleaks tidak dipasang pada laptop anda.** Ia berjalan dalam kontena Docker melalui fungsi `gitleaks` dalam `alat.sh`. Semak dengan `gitleaks version`, yang mesti memberi `v8.30.1`. Jika terminal memberi `gitleaks: command not found`, jalankan `source alat.sh` dahulu. Kontena itu hidup beberapa saat sahaja dan dipadam apabila imbasan tamat, jadi ia tidak akan muncul dalam `docker ps`; itu normal.
+
 ## Jadual
 
 | Masa | Aktiviti |

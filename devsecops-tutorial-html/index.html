@@ -2894,6 +2894,9 @@ source alat.sh
 ls
 </code></pre></div>
 <p><code>ls</code> mesti menunjukkan <code>README.md</code>, <code>aspnet-app</code>, <code>k8s</code>, <code>laravel-app</code>, <code>terraform</code> dan <code>alat.sh</code>. Folder <code>k8s/</code> (manifest Kubernetes) dan <code>terraform/</code> ialah sebahagian daripada repo lab yang anda klon, bukan fail yang anda cipta. Jika <code>ls</code> tidak menunjukkannya, anda bukan dalam folder yang betul, atau repo belum diklon (Persediaan 2).</p>
+<blockquote>
+<p><strong>Gitleaks tidak dipasang pada laptop anda.</strong> Ia berjalan dalam kontena Docker melalui fungsi <code>gitleaks</code> dalam <code>alat.sh</code>. Semak dengan <code>gitleaks version</code>, yang mesti memberi <code>v8.30.1</code>. Jika terminal memberi <code>gitleaks: command not found</code>, jalankan <code>source alat.sh</code> dahulu. Kontena itu hidup beberapa saat sahaja dan dipadam apabila imbasan tamat, jadi ia tidak akan muncul dalam <code>docker ps</code>; itu normal.</p>
+</blockquote>
 <h2 id="m1-jadual"><a class="hl" href="#m1-jadual">Jadual</a></h2>
 <div class="tbl"><table>
 <thead>
