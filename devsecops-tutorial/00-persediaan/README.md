@@ -258,6 +258,40 @@ Jika `docker login` memberi `x509: certificate signed by unknown authority`, ten
 - **`curl` memberi `200` tetapi `docker login` masih gagal**: daemon Docker Desktop belum mengambil CA daripada Windows. Ulang langkah 4 dalam 4b (**Quit Docker Desktop**, `wsl --shutdown`, mulakan semula), dan pastikan langkah 2 (import dalam PowerShell Administrator) berjaya.
 - Cadangan terakhir: **Docker Desktop → Settings → Docker Engine**, tambah `"insecure-registries": ["harbor.lab.test"]`, kemudian **Apply & restart**. Ini melangkau pengesahan sijil dan hanya wajar untuk makmal ini.
 
+### 4d. Hantar repo lab ke GitLab anda
+
+Repo lab yang anda klon dalam Bahagian 2 masih menunjuk ke GitHub instruktur (`origin`). Repo itu **awam dan hanya boleh dibaca**: `git push` ke sana gagal dengan `Invalid username or token. Password authentication is not supported for Git operations`, kerana anda tidak ada kebenaran menulis. Repo kerja anda ialah projek `pesertaNN/devsecops-lab` di GitLab Linode. Sambungkannya sekarang, sekali sahaja.
+
+**Langkah 1: beritahu Git siapa anda.** Tanpa ini, `git commit` gagal dengan `Author identity unknown` (nilai palsu pun boleh):
+
+```bash
+git config --global user.name "Nama Anda"
+git config --global user.email "anda@contoh.com"
+```
+
+**Langkah 2: tukar remote.** Gantikan `pesertaNN` dengan nama pengguna anda (contohnya `peserta03`):
+
+```bash
+cd ~/devsecops-lab
+git remote rename origin upstream
+git remote add gitlab https://gitlab.lab.test:8929/pesertaNN/devsecops-lab.git
+git remote -v
+```
+
+`upstream` ialah repo instruktur (hanya untuk dibaca), dan `gitlab` ialah projek anda. `git remote -v` mesti menunjukkan kedua-duanya.
+
+**Langkah 3: tolak ke GitLab.**
+
+```bash
+git push -u gitlab main
+```
+
+Git meminta *Username* (`pesertaNN`) dan *Password* (kata laluan GitLab anda, yang sama dengan Harbor). Anda tidak nampak apa-apa ditaip semasa memasukkan kata laluan, itu biasa. Hasilnya berakhir dengan `branch 'main' set up to track 'gitlab/main'`. Selepas ini `git push` biasa (tanpa nama remote) menolak ke GitLab.
+
+Buka <https://gitlab.lab.test:8929/pesertaNN/devsecops-lab> dalam pelayar: anda akan melihat `aspnet-app`, `laravel-app`, `k8s` dan `terraform`. Fail `alat.sh` yang anda salin tidak muncul kerana ia belum di-commit; itu tidak mengapa.
+
+> **Ralat `SSL certificate problem`?** CA lab belum dipercayai dalam Ubuntu: ulang 4b. **`Authentication failed` atau `HTTP Basic: Access denied`?** Semak nama pengguna dan kata laluan. Jika masih gagal, log masuk di pelayar dahulu, kerana ia mungkin ralat 422 (lihat 4c). Pada kali pertama, jangan jalankan `git push` tanpa `-u gitlab main`: `main` masih mengikut `upstream` (GitHub instruktur), jadi ia akan memberi ralat `Invalid username or token` di atas.
+
 ## 5. Pilih trek
 
 Pilih **Trek A** atau **Trek B** di menu kiri. Anda boleh menukar bila-bila masa.
@@ -271,4 +305,5 @@ Pilih **Trek A** atau **Trek B** di menu kiri. Anda boleh menukar bila-bila masa
 - [ ] (Pilihan) Threat Dragon dipasang di Windows
 - [ ] Entri `hosts` ditambah dan CA lab dipercayai
 - [ ] `docker login harbor.lab.test` berjaya dan `https://gitlab.lab.test:8929` boleh dilog masuk
+- [ ] Identiti Git ditetapkan; jika guna GitLab, `git push -u gitlab main` berjaya (kod anda kelihatan di GitLab)
 - [ ] Trek dipilih di menu kiri

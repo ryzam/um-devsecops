@@ -107,6 +107,7 @@ Cipta repo baharu di GitHub (UI: **New repository**, jangan tambah README). Kemu
 ```bash
 git add -A
 git commit -m "Pembaikan keselamatan Modul 1 hingga 5"
+git remote rename origin upstream 2>/dev/null   # origin lama menunjuk ke repo instruktur (baca sahaja)
 git remote add origin https://github.com/NAMA_ANDA/devsecops-lab.git
 git push -u origin main
 ```
@@ -134,11 +135,11 @@ Instruktur sudah mencipta projek kosong `pesertaNN/devsecops-lab` untuk anda di 
 ```bash
 git add -A
 git commit -m "Pembaikan keselamatan Modul 1 hingga 5"
-git remote add gitlab https://gitlab.lab.test:8929/pesertaNN/devsecops-lab.git
-git push -u gitlab main
+git remote -v
+git push gitlab main
 ```
 
-Git meminta nama pengguna dan kata laluan GitLab anda. Jika `git` memberi ralat sijil (`SSL certificate problem`), CA lab belum dipercayai dalam terminal Ubuntu: ulang Persediaan 4b.
+`git remote -v` mesti menunjukkan remote `gitlab` (daripada Persediaan 4d). Jika tiada, tambah dahulu: `git remote rename origin upstream` dan `git remote add gitlab https://gitlab.lab.test:8929/pesertaNN/devsecops-lab.git`, kemudian `git push -u gitlab main`. Jangan tolak ke `upstream` atau `origin` yang menunjuk ke GitHub instruktur: ia memberi `Invalid username or token`. Git meminta nama pengguna dan kata laluan GitLab anda. Jika `git` memberi ralat sijil (`SSL certificate problem`), CA lab belum dipercayai dalam terminal Ubuntu: ulang Persediaan 4b.
 
 Dalam GitLab: **Settings → CI/CD → Variables**. Tambah satu demi satu:
 
