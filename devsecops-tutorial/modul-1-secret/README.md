@@ -299,7 +299,90 @@ cd ~ && rm -rf ~/demo-gitleaks
 
 > **Hook mesti menggunakan `#!/usr/bin/env bash`.** Dengan `#!/bin/sh`, commit gagal dengan `Syntax error: Bad function name` kerana `alat.sh` mentakrif fungsi bernama `kube-linter`, dan `/bin/sh` pada Ubuntu (dash) tidak membenarkan tanda sempang dalam nama fungsi. Commit itu gagal bukan kerana secret, jadi ralat itu mengelirukan.
 
-> Hook di `.git/hooks/` tidak ikut klon. Dalam pasukan, guna rangka kerja `pre-commit` atau `husky` supaya hook dipasang secara automatik, dan **jangan bergantung padanya semata-mata**: pembangun boleh mengelak dengan `--no-verify`. Imbasan di CI (Modul 6) ialah jaring keselamatan sebenar.
+### Cara kedua: rangka kerja `pre-commit` (untuk pasukan)
+
+Hook di `.git/hooks/` **tidak ikut klon**: setiap pembangun mesti memasangnya sendiri. Dalam pasukan, cara biasa ialah rangka kerja [pre-commit](https://pre-commit.com). Senarai hook ditulis dalam satu fail `.pre-commit-config.yaml` yang masuk ke dalam git, jadi semua orang menggunakan konfigurasi yang sama.
+
+**Langkah 1: pasang `pre-commit`** (sekali sahaja, dalam Ubuntu WSL anda):
+
+```bash
+sudo apt install -y pipx
+pipx install pre-commit
+export PATH="$HOME/.local/bin:$PATH"
+pre-commit --version
+```
+
+Anda akan melihat nombor versi (contohnya `pre-commit 4.7.0`). Jika `pre-commit: command not found` pada terminal baharu, jalankan `pipx ensurepath` dan buka semula terminal.
+
+**Langkah 2: cipta repo sementara dan fail konfigurasi.** Sekali lagi di luar repo lab:
+
+```bash
+mkdir ~/demo-precommit && cd ~/demo-precommit
+git init -q -b main
+git config user.name demo && git config user.email demo@lab.test
+echo "# app demo" > README.md && git add . && git commit -qm "Commit awal"
+
+cat > .pre-commit-config.yaml <<'EOF'
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks-docker
+EOF
+```
+
+Dua perkara tentang fail ini:
+
+- `rev` ialah versi Gitleaks yang dikunci, sama dengan versi bengkel. Untuk naik ke versi terkini kemudian, jalankan `pre-commit autoupdate`.
+- `id: gitleaks-docker` menjalankan Gitleaks melalui [imej Docker rasmi](https://github.com/gitleaks/gitleaks#docker), jadi tiada apa-apa dipasang pada laptop. Ini sesuai dengan kita kerana Docker sudah ada. Pilihan lain ialah `id: gitleaks`, yang membina Gitleaks secara native dan memerlukan Go. Gitleaks daripada `alat.sh` **tidak boleh** digunakan di sini kerana ia fungsi shell, bukan program yang boleh dipanggil oleh `pre-commit`.
+
+**Langkah 3: pasang hook ke dalam repo ini, dan uji.**
+
+```bash
+pre-commit install
+git add .pre-commit-config.yaml
+git commit -m "Tambah pre-commit"; echo "exit=$?"
+```
+
+Kali pertama, `pre-commit` memuat turun definisi hook dan Docker menarik imej Gitleaks, jadi ia mengambil masa lebih lama daripada commit biasa. Anda mesti melihat `Detect hardcoded secrets....Passed` dan `exit=0`. Sekarang cuba commit secret:
+
+```bash
+printf 'API_KEY=kd_live_8f3a91c27b6d4e5f9a0b1c2d3e4f5a6b\n' > .env
+git add .env
+git commit -m "Tambah konfigurasi"; echo "exit=$?"
+```
+
+Anda mesti melihat:
+
+```text
+Detect hardcoded secrets.................................................Failed
+- hook id: gitleaks-docker
+- exit code: 1
+...
+RuleID:      generic-api-key
+File:        .env
+...
+leaks found: 1
+exit=1
+```
+
+Commit disekat. Perhatikan format keluarannya: satu baris status bagi setiap hook (`Passed`, `Failed` atau `Skipped`), diikuti output Gitleaks sekiranya gagal.
+
+**Langkah 4: melangkau hook.** Untuk melangkau satu hook tertentu, letak `SKIP=<id hook>` di hadapan arahan commit:
+
+```bash
+SKIP=gitleaks-docker git commit -m "langkau gitleaks"; echo "exit=$?"
+```
+
+Anda akan melihat `Detect hardcoded secrets....Skipped` dan commit berjaya (`exit=0`), **termasuk fail `.env` yang mengandungi secret itu**. Inilah sebabnya hook tidak boleh menjadi satu-satunya pertahanan. Bersihkan:
+
+```bash
+cd ~ && rm -rf ~/demo-precommit
+```
+
+> **Ingat:** `pre-commit install` hanya memasang hook pada repo tempatan. Setiap pembangun masih perlu menjalankan `pre-commit install` selepas `git clone`, dan boleh mengelak hook dengan `SKIP=...` atau `git commit --no-verify`. Kerana itu, imbasan di CI (Modul 6) ialah jaring keselamatan sebenar. Hook pre-commit hanya memberi maklum balas pantas kepada pembangun sebelum kod sampai ke sana.
+
+> Jika repo anda sudah ada hook buatan sendiri di `.git/hooks/pre-commit` (seperti Makmal 1.5 di atas), `pre-commit install` memindahkannya ke `pre-commit.legacy` dan menjalankan kedua-duanya (mesej `Running in migration mode with existing hooks`), jadi Gitleaks diimbas dua kali. Pilih satu cara sahaja bagi sesuatu repo. Jangan jalankan `pre-commit install` dalam `~/devsecops-lab` jika anda sudah memasang hook Makmal 1.5 di situ.
 
 ---
 
