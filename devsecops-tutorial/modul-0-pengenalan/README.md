@@ -353,7 +353,17 @@ docker push harbor.lab.test/$P/laravel-app:uji
 
 </div>
 
-Buka <https://harbor.lab.test> dalam pelayar, log masuk, dan lihat image anda dalam projek `pesertaNN`. Tunggu beberapa saat; Harbor mengimbas secara automatik dan menunjukkan kiraan kerentanan.
+### Lihat keputusan imbasan di Harbor
+
+Buka <https://harbor.lab.test> dalam pelayar dan log masuk sebagai `pesertaNN`. Kemudian:
+
+1. Klik **Projects**, kemudian projek anda (`pesertaNN`).
+2. Dalam tab **Repositories**, klik nama repositori (contohnya `pesertaNN/aspnet-app`).
+3. Anda melihat senarai **Artifacts**, satu baris bagi setiap tag atau digest. Lajur **Vulnerabilities** menunjukkan ringkasan imbasan: bilangan kerentanan mengikut tahap (Critical, High, Medium, Low). Harbor mengimbas secara automatik selepas push, jadi tunggu beberapa saat; jika lajur masih menunjukkan status belum selesai, muat semula halaman.
+4. Klik **digest** artifact (teks yang bermula dengan `sha256:`) untuk membuka butirannya. Bahagian **Vulnerabilities** menyenaraikan setiap CVE dengan pakej yang terlibat, versi yang dipasang dan versi yang membaikinya (*Fixed in*).
+5. Jika artifact belum diimbas, tandakan baris itu dalam senarai Artifacts dan klik **Scan**.
+
+Imej lab ini sengaja dibina tanpa pembaikan, jadi jangan terkejut jika ia mempunyai banyak kerentanan. Untuk sekarang kita hanya mahu melihat bahawa imbasan berlaku. Cara membaiki dan menyekat imej berisiko dibincangkan di Modul 4. Imbasan ini dibuat oleh Trivy **di dalam Harbor**, yang berbeza daripada Trivy yang anda jalankan di laptop: lihat perbandingan dalam Modul 4, bahagian "Trivy di laptop dan Trivy di Harbor".
 
 Hentikan app:
 

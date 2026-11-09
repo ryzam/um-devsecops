@@ -64,6 +64,28 @@ Setiap pakej yang tidak perlu semasa app berjalan hanya menambah **permukaan ser
 
 > **Perhatian penting.** Docker versi baharu menambah *attestation* (provenance dan SBOM) pada imej yang dibina, lalu imej ditolak sebagai **OCI index** dengan beberapa rujukan. Dalam ujian di server lab ini, polisi pencegahan Harbor **tidak berkuat kuasa** bagi imej index tersebut: `docker pull` berjaya walaupun ambang ditetapkan serendah Low, manakala imej yang sama dibina dengan `--provenance=false --sbom=false` ditolak dengan HTTP 412. Sebab itu semua arahan binaan dalam bengkel ini menggunakan bendera tersebut. Pengajarannya lebih luas: **sahkan bahawa kawalan anda benar-benar menyekat**, jangan hanya percaya ia dihidupkan.
 
+### Trivy di laptop dan Trivy di Harbor
+
+Anda akan menggunakan Trivy di dua tempat. Enjinnya sama, tetapi peranannya berbeza:
+
+| | Trivy di laptop (`alat.sh`) | Trivy di Harbor |
+|---|---|---|
+| **Cara dijalankan** | Anda taip `trivy ...` (kontena Docker, v0.76.2 dikunci) | Scanner terbina dalam Harbor; berjalan sendiri selepas `docker push` |
+| **Apa yang boleh diimbas** | Banyak sasaran: `fs` (kod dan dependency), `config` (Dockerfile, K8s, Terraform), `image` dan secret | Hanya **imej** yang sudah ada dalam Harbor, untuk kerentanan pakej (OS dan bahasa) |
+| **Pilihan** | Bebas: `--severity`, `--exit-code`, `.trivyignore`, format output | Tetapan projek: imbas automatik, dan ambang polisi |
+| **Keputusan** | Dipaparkan dalam terminal; anda yang bertindak | Disimpan di Harbor (tab *Vulnerabilities*), dan **dikuatkuasakan** |
+| **Kesan** | Tiada, melainkan anda menyemak `exit` | Polisi *Prevent vulnerable images from running* pada ambang **High**: imej yang melebihinya ditolak semasa `pull` dengan HTTP 412 |
+| **Pangkalan data kerentanan** | Dimuat turun ke laptop anda apabila dijalankan | Dikemas kini oleh Harbor sendiri di server |
+
+Empat perkara yang perlu diingat:
+
+1. **Skop.** Trivy di Harbor tidak memeriksa kod sumber, manifest K8s atau Terraform. Imbasan `fs` dan `config` hanya boleh dibuat di laptop atau CI.
+2. **Pintu yang berbeza.** Dalam pipeline (Modul 6), Trivy imej menggagalkan job pada `CRITICAL` **sebelum** `docker push`. Harbor menyekat pada `High` **selepas** imej sampai. Maka imej `High` boleh masuk ke Harbor, tetapi tiada sesiapa boleh menariknya.
+3. **Keputusan boleh berbeza.** Imej yang sama boleh memberi bilangan temuan berlainan di laptop dan di Harbor kerana pangkalan data kerentanan dikemas kini pada masa yang berbeza, dan versi Trivy dalam Harbor tidak semestinya v0.76.2.
+4. **Harbor ialah kawalan yang tidak boleh dielak.** Imbasan di laptop boleh dilangkau oleh pembangun, tetapi polisi Harbor menyekat imej berisiko semasa `pull` tanpa mengira bagaimana imej itu sampai ke sana.
+
+Ringkasnya, Trivy di laptop ialah alat untuk **menyiasat** (luas, pantas, fleksibel), dan Trivy di Harbor ialah **pintu terakhir** bagi imej (sempit, automatik, mengikat).
+
 ---
 
 ## Makmal 4.1: Imbas imej
