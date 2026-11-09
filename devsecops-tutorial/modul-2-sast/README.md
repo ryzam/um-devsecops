@@ -52,6 +52,28 @@ Dalam makmal ini anda akan melihat ketiga-tiganya dengan data sebenar.
 
 **Semgrep** menulis peraturan dalam bentuk yang kelihatan seperti kod itu sendiri, dan mempunyai pustaka peraturan komuniti (`p/default`, `p/owasp-top-ten`, `p/gitlab` dan lain-lain). Ia menyokong C#, PHP dan banyak bahasa lain dalam satu alat. Untuk .NET dan Laravel, alat khusus bahasa wujud sebagai pelengkap: penganalisis Roslyn (`Microsoft.CodeAnalysis.NetAnalyzers`, Security Code Scan) dan PHPStan/Larastan. Bengkel ini menumpu pada Semgrep supaya kedua-dua trek mempunyai alat yang sama.
 
+### Semgrep lawan SonarQube
+
+Banyak organisasi sudah menggunakan **SonarQube**, jadi anda mungkin bertanya kenapa ia tidak ada dalam bengkel ini. Kedua-duanya ialah alat analisis statik, tetapi dibina untuk tujuan yang berbeza:
+
+| | Semgrep (dalam bengkel) | SonarQube Community Build |
+|---|---|---|
+| **Cara berjalan** | Kontena sekali guna, tiada pelayan | Pelayan berterusan: tiga proses Java (termasuk Elasticsearch) dan pangkalan data, ditambah pengimbas (*scanner*) pada CI |
+| **Sumber** | Ringan | Dokumentasi rasmi: 4 GB RAM, 2 teras dan 30 GB cakera bagi pemasangan kecil (sehingga satu juta baris kod) |
+| **Fokus** | Keselamatan; peraturan sendiri mudah ditulis | Kualiti kod (bug, *code smell*, pertindihan, liputan ujian) dan keselamatan |
+| **Keputusan** | Log CI dan SARIF | Papan pemuka web, sejarah trend dan quality gate terbina dalam |
+| **C# dan PHP** | Disokong | Disokong |
+| **Cawangan dan merge request** | Mengimbas apa yang ada dalam checkout | Analisis cawangan dan *pull/merge request* hanya dalam edisi berbayar (Developer dan ke atas) |
+| **Taint analysis merentas fungsi dan fail** | Tidak dibincangkan dalam bengkel ini | Edisi berbayar (Developer dan ke atas) |
+
+**Kenapa tidak dalam bengkel ini.** SonarQube bertindih dengan Semgrep untuk matlamat kita (SAST sebagai pintu CI), dan pelayannya menambah beban pada server lab yang sudah menjalankan Harbor dan GitLab. Menambahnya juga bermakna peserta mempelajari satu lagi alat sebelum sempat memahami konsepnya.
+
+**Bila yang mana.** Semgrep sesuai untuk pintu keselamatan yang ringan, peraturan khusus projek, dan CI yang pantas. SonarQube sesuai jika pasukan mahu papan pemuka, trend kualiti dan liputan ujian dalam satu tempat. Banyak pasukan menggunakan kedua-duanya.
+
+**Apa yang anda pelajari tetap terpakai.** Konsep yang sama berpindah terus ke SonarQube: peraturan, triaj temuan, positif palsu, menerima temuan dengan alasan, dan **quality gate** yang menggagalkan CI. Hanya alatnya berbeza.
+
+> Maklumat keperluan dan edisi diambil daripada dokumentasi SonarSource (disemak pada 9 November 2026). Ia berubah mengikut versi, jadi semak dokumentasi semasa sebelum membuat keputusan.
+
 ---
 
 ## Makmal 2.1: Imbas app anda
