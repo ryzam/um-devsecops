@@ -515,6 +515,86 @@ gitleaks git . --no-banner --baseline-path gitleaks-baseline.json -l error; echo
 
 ---
 
+## Amalan terbaik: fail `.gitignore`
+
+`.gitignore` ialah pertahanan pertama terhadap secret: fail yang diabaikan tidak akan dipentaskan oleh `git add .`. Tetapi ia hanya berfungsi jika ditulis **sebelum** fail itu dijejaki.
+
+### Contoh `.gitignore` untuk projek seperti lab ini
+
+```gitignore
+# --- Secret dan kelayakan ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+secrets.json
+cosign.key
+
+# --- Terraform ---
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+
+# --- Kubernetes ---
+kubeconfig
+*.kubeconfig
+
+# --- Output binaan dan kebergantungan ---
+bin/
+obj/
+vendor/
+node_modules/
+
+# --- Keputusan imbasan (dijana semula, boleh besar) ---
+*.sarif
+sbom*.json
+zap-hasil/
+
+# --- Pangkalan data tempatan ---
+*.db
+*.sqlite
+
+# --- Editor dan OS ---
+.vs/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+```
+
+Fail ini telah diuji dalam repo sementara dengan fail palsu bagi setiap corak. `git add .` hanya menjejaki `.env.example`, `.gitignore`, `Program.cs`, `ca.crt` dan `prod.tfvars.example`. `.env`, `.env.production`, `server.pem`, `cosign.key`, `terraform.tfstate`, `prod.tfvars`, `app.db`, `bin/`, `zap-hasil/` dan `sbom.cdx.json` semuanya diabaikan.
+
+### Peraturan yang patut diikuti
+
+1. **Mulakan daripada templat, bukan dari kosong.** Repositori [github/gitignore](https://github.com/github/gitignore) menyediakan templat untuk `VisualStudio` (.NET), `Laravel`, `Terraform` dan lain-lain. Salin, kemudian tambah bahagian secret dan imbasan di atas, yang biasanya tiada dalam templat bahasa.
+2. **Letak `.gitignore` sebelum commit pertama**, dan commit-kannya bersama kod. Fail yang sudah dijejaki **tidak** diabaikan walaupun anda menambahnya kemudian. Lihat bahagian di bawah.
+3. **Abaikan fail sebenar, simpan templat.** `.env.*` mengabaikan `.env.production`, dan `!.env.example` mengecualikan templat daripada peraturan itu supaya ia boleh di-commit tanpa nilai. Corak yang sama untuk `*.tfvars` dan `*.tfvars.example`.
+4. **Jangan abaikan sijil awam.** `*.key` dan `*.pem` (kunci peribadi) wajar diabaikan, tetapi `ca.crt` ialah sijil awam dan perlu ada dalam repo (seperti dalam repo lab ini).
+5. **Fail editor peribadi** (`.idea/`, `.vscode/`) boleh diletak dalam `.gitignore` global anda dan bukan dalam repo: `git config --global core.excludesfile ~/.gitignore_global`.
+6. **Semak, jangan andaikan.** `git check-ignore -v .env.production` menunjukkan peraturan mana yang memadankannya (tiada output bermakna fail itu **tidak** diabaikan), dan `git status --ignored --short` menyenaraikan semua yang diabaikan (ditanda `!!`).
+
+### Fail sudah dijejaki
+
+`.gitignore` tidak berkesan pada fail yang sudah ada dalam git. Keluarkan daripada penjejakan (fail pada cakera kekal):
+
+```bash
+git rm --cached .env
+git commit -m "Berhenti menjejaki .env"
+```
+
+Ini menghentikan penjejakan **mulai sekarang sahaja**. Versi lama `.env` masih ada dalam sejarah, dan semua klon yang sudah wujud mempunyainya. Jika fail itu mengandungi secret sebenar, ikut "Urutan apabila secret bocor" di atas: putar secret dahulu.
+
+### `.gitignore` bukan kawalan keselamatan
+
+`git add -f .env` memaksa fail yang diabaikan masuk, dan pembangun boleh terlupa menambah corak baharu. Kerana itu `.gitignore` dipasangkan dengan **pre-commit hook** (Makmal 1.5) dan **imbasan CI** (Modul 6): `.gitignore` mencegah kemalangan biasa, hook dan CI menangkap yang terlepas.
+
+---
+
 ## Secrets management
 
 Mengeluarkan secret daripada kod belum cukup; ia perlu disimpan dan diedarkan dengan selamat.
@@ -538,6 +618,7 @@ Peraturan ringkas: **jangan hantar secret, hantar identiti**. Bila boleh, gantik
 - [ ] Pre-commit hook saya menghalang commit yang mengandungi secret
 - [ ] Saya mengeluarkan secret daripada kod dan `gitleaks dir` melaporkan `no leaks found`
 - [ ] Saya boleh terangkan kenapa sejarah masih bocor dan urutan tindak balas
+- [ ] Saya tahu apa yang patut ada dalam `.gitignore` dan kenapa ia tidak mengubah fail yang sudah dijejaki
 
 ## Rujukan
 
