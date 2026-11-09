@@ -160,7 +160,7 @@ Pada Hari 4 anda juga memerlukan `k3d` dan `kubectl`; arahan pemasangan ada di [
 
 ### 3b. OWASP Threat Dragon (pilihan)
 
-Untuk Makmal 0.1 bahagian B. Ia dipasang di **Windows**, bukan dalam WSL. Muat turun `Threat-Dragon-ng-Setup-2.6.2.exe` (≈ 154 MB) daripada [halaman release](https://github.com/OWASP/threat-dragon/releases), jalankan pemasang, dan pastikan aplikasi boleh dibuka. Tiada log masuk atau Docker diperlukan. Jika gagal, abaikan: makmal itu boleh disiapkan dengan jadual sahaja.
+Untuk Makmal 0.1 bahagian B. Ia dipasang di **Windows**, bukan dalam WSL. Muat turun `Threat-Dragon-ng-Setup-2.6.2.exe` (≈ 154 MB) daripada [halaman release](https://github.com/OWASP/threat-dragon/releases), jalankan pemasang, dan pastikan aplikasi boleh dibuka. Tiada log masuk atau Docker diperlukan. Jika gagal, abaikan: bahagian B ialah pilihan dan bahagian A (jadual) sudah mencukupi.
 
 ## 4. Akses ke Harbor dan GitLab
 

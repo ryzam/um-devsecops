@@ -6,7 +6,7 @@ Dalam modul ini anda akan:
 
 1. Faham apa itu DevSecOps, shift-left dan quality gate, dan kenapa kontena serta kod yang dijana AI mengubah risiko.
 2. Kenal lima jenis imbasan dan di mana setiap satu berada dalam pipeline.
-3. Membuat **threat model** untuk app Kedai Bengkel menggunakan gambar rajah aliran data dan STRIDE.
+3. Membaca dan memahami **threat model** untuk app Kedai Bengkel, yang dibina daripada gambar rajah aliran data dan STRIDE.
 4. Menjalankan app lab dan **mengeksploit** tiga kelemahan secara manual, supaya anda tahu apa yang imbasan sepatutnya tangkap.
 
 > Prasyarat: bahagian [Persediaan](../00-persediaan/README.md) siap, terutama Docker dan repo lab.
@@ -77,29 +77,13 @@ Elemen DFD: **entiti luar** (pengguna), **proses** (app), **simpanan data** (DB,
 
 ## Makmal 0.1: Threat model Kedai Bengkel
 
-**Tujuan.** Menjana senarai ancaman daripada DFD sebelum melihat satu pun hasil imbasan.
+**Tujuan.** Melihat bagaimana ancaman dikenal pasti daripada gambar rajah aliran data (DFD) sebelum melihat satu pun hasil imbasan, supaya anda tahu **bahasa** yang digunakan untuk menilai temuan dalam modul seterusnya.
 
-**Masa.** Bahagian A (jadual ancaman), berpasangan: 30 minit. Bahagian B (Threat Dragon) ialah **pilihan** dan memerlukan kira-kira 30 minit tambahan: lakukan jika masa mengizinkan, atau selepas bengkel.
+**Masa.** Bahagian A (membaca jadual dan berbincang): 20 minit. Bahagian B (Threat Dragon) ialah **pilihan** dan memerlukan kira-kira 30 minit tambahan: lakukan jika masa mengizinkan, atau selepas bengkel.
 
-### Bahagian A: jadual ancaman
+### Bahagian A: jadual ancaman Kedai Bengkel
 
-Rujuk rajah di atas. Salin jadual ini pada kertas atau fail teks dan isikan sekurang-kurangnya **enam** baris. Satu contoh diberi.
-
-| # | Aliran / komponen | STRIDE | Ancaman | Kawalan yang dicadangkan |
-|---|---|---|---|---|
-| 1 | Pengguna → App (log masuk) | T | Input log masuk digabung dalam query SQL | Query berparameter |
-| 2 | | | | |
-
-Soalan panduan:
-
-1. Aliran mana yang merentas sempadan kepercayaan?
-2. Apa yang berlaku jika data daripada pengguna sampai ke **shell**, **sistem fail** atau **pangkalan data**?
-3. Apa yang menentukan bahawa seseorang itu admin? Boleh dipalsukan?
-4. Apa yang dipaparkan semula kepada pengguna lain (buku pelawat)?
-5. Apa yang berlaku di sekeliling app (image, pipeline, kluster) yang tidak ada dalam rajah? Tambah satu entiti luar untuk rantaian bekalan.
-
-<details>
-<summary>Jawapan contoh</summary>
+Rujuk rajah DFD di atas. Jadual di bawah ialah **threat model yang lengkap** untuk app Kedai Bengkel. Anda tidak perlu mengisinya: tugas anda ialah **membacanya** dan memahami bagaimana setiap baris dihasilkan. Setiap baris ialah satu ancaman:
 
 | # | Aliran / komponen | STRIDE | Ancaman | Kawalan |
 |---|---|---|---|---|
@@ -113,8 +97,23 @@ Soalan panduan:
 | 8 | `/api/users/{id}` | I | IDOR dan hash kata laluan didedahkan | Semakan kebenaran, jangan pulangkan hash |
 | 9 | Pipeline → Image → Kluster | T | Image atau pakej dirosakkan | Imbasan SCA/image, tandatangan image (Modul 6) |
 
+**Cara membaca jadual.** Anda tidak memerlukan latar belakang keselamatan:
+
+- **Aliran / komponen**: di mana dalam rajah masalah itu berlaku, biasanya pada anak panah yang membawa data daripada pengguna ke dalam app.
+- **STRIDE**: huruf jenis ancaman daripada jadual di atas. Satu baris boleh mempunyai lebih daripada satu huruf.
+- **Ancaman**: apa yang penyerang boleh lakukan, dalam bahasa mudah.
+- **Kawalan**: apa yang pembangun patut lakukan untuk menghalangnya. Dalam bengkel ini, setiap kawalan akan anda lihat atau gunakan.
+
+**Contoh baris 1.** Pengguna menaip nama pengguna dan kata laluan pada halaman `/login`. App menyambung teks itu terus ke dalam arahan SQL. Penyerang menaip `admin'--` sebagai nama pengguna, dan tanda `--` menjadikan semakan kata laluan sebagai komen, jadi log masuk berjaya tanpa kata laluan. Itu **T** (Tampering: query diubah) dan **S** (Spoofing: berpura-pura menjadi admin). Kawalannya ialah query berparameter, yang memisahkan arahan SQL daripada data pengguna.
+
+**Perbincangan** (berpasangan, beberapa minit; tiada jawapan bertulis):
+
+1. Aliran mana dalam jadual yang merentas sempadan kepercayaan (daripada pengguna ke dalam app)? Kenapa ancaman paling banyak di situ?
+2. Apa yang berlaku jika data daripada pengguna sampai ke **shell**, **sistem fail** atau **pangkalan data**? Cari baris yang sepadan.
+3. Apa yang menentukan bahawa seseorang itu admin dalam app ini? Boleh dipalsukan? (Baris 7.)
+4. Baris 9 ialah ancaman di sekeliling app (image, pipeline, kluster) yang tiada dalam rajah asal. Apa lagi yang boleh berlaku di situ?
+
 Perhatikan bahawa kebanyakan baris ini akan muncul semula sebagai temuan imbasan dalam modul seterusnya. Threat model memberi anda **bahasa** untuk menilai temuan itu.
-</details>
 
 ### Bahagian B (Pilihan): masukkan ke OWASP Threat Dragon
 
@@ -156,7 +155,7 @@ Jika klon `~/um-devsecops` tiada, salin kandungan fail di atas (butang **Salin**
 
 1. Klik satu unsur, contohnya anak panah **Permintaan pengguna**. Sifat unsur dan ancamannya muncul di panel bawah.
 2. Klik **New Threat**. Isi **Title**, pilih **Threat Type** (enam jenis STRIDE), **Severity**, tulis **Description** dan **Mitigations**, kemudian klik **Apply**.
-3. Ulang sehingga anda ada sekurang-kurangnya **enam** ancaman, sepadan dengan jadual di bahagian A. Sempadan kepercayaan tidak boleh mempunyai ancaman; letakkan ancaman pada anak panah yang merentasinya.
+3. Ulang sehingga anda telah memindahkan sekurang-kurangnya **enam** baris daripada jadual di bahagian A sebagai ancaman (tajuk, jenis STRIDE dan kawalan boleh disalin daripada jadual). Sempadan kepercayaan tidak boleh mempunyai ancaman; letakkan ancaman pada anak panah yang merentasinya.
 4. Klik **Save**. Jika aplikasi meminta lokasi fail, simpan dalam folder `Documents\model-ancaman`. Fail JSON anda kini mengandungi semua ancaman.
 
 **Ukur dengan kunci jawapan.** Salin fail kunci jawapan ke folder yang sama (dalam terminal Ubuntu; takrifkan `W` semula jika terminal baharu):
@@ -166,7 +165,7 @@ W=$(wslpath "$(powershell.exe -NoProfile -Command '[Environment]::GetFolderPath(
 cp ~/um-devsecops/devsecops-tutorial/modul-0-pengenalan/kedai-bengkel-jawapan.json "$W/model-ancaman/"
 ```
 
-Kemudian buka `kedai-bengkel-jawapan.json` dalam Threat Dragon dengan butang **Open** seperti Langkah 3 dan bandingkan. Ia mengandungi sembilan ancaman, sepadan dengan jadual jawapan di atas. Soalan perbincangan:
+Kemudian buka `kedai-bengkel-jawapan.json` dalam Threat Dragon dengan butang **Open** seperti Langkah 3 dan bandingkan. Ia mengandungi kesemua sembilan ancaman, sepadan dengan jadual di bahagian A. Soalan perbincangan:
 
 - Ancaman mana yang anda lihat tetapi kunci jawapan tiada? Itu mungkin ancaman sebenar yang kami terlepas.
 - Ancaman mana yang boleh dikesan oleh imbasan (SAST, DAST, SCA) dan mana yang tidak? Tulis di sebelah setiap ancaman; jawapannya akan menjadi jelas apabila anda melihat hasil imbasan dalam modul seterusnya.
@@ -296,7 +295,7 @@ curl -s -X POST $APP/api/profile/2 -d "role=admin"
 
 </div>
 
-Kenal pasti: bagi setiap serangan, apa yang STRIDE kata? Padankan dengan baris dalam jadual threat model anda.
+Kenal pasti: bagi setiap serangan, apa yang STRIDE kata? Padankan dengan baris dalam jadual threat model di Makmal 0.1.
 
 <details>
 <summary>Jawapan jangkaan</summary>
@@ -349,8 +348,8 @@ docker rm -f kedai
 ## Senarai semak Modul 0
 
 - [ ] Saya boleh menerangkan shift-left dan quality gate dengan ayat sendiri
-- [ ] Saya sudah mengisi sekurang-kurangnya enam baris threat model
-- [ ] (Pilihan) Saya sudah memasukkannya ke Threat Dragon dan menyimpan fail JSON
+- [ ] Saya boleh membaca jadual threat model dan menerangkan satu baris: aliran, jenis STRIDE, ancaman dan kawalan
+- [ ] (Pilihan) Saya sudah membuka model dalam Threat Dragon dan menambah ancaman
 - [ ] App saya berjalan dan saya berjaya mengeksploit tiga kelemahan
 - [ ] Saya berjaya push image ke projek Harbor saya dan melihat hasil imbasannya
 - [ ] Saya tahu STRIDE huruf mana untuk setiap serangan tadi
