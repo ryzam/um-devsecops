@@ -5,7 +5,7 @@
 Dalam modul ini anda akan:
 
 1. Faham beza DAST dan SAST, dan beza antara imbasan **pasif** dan **aktif**.
-2. Menjalankan **OWASP ZAP** dalam tiga mod (baseline, imbasan aktif ringan, dan API) terhadap app anda yang sedang berjalan.
+2. Menjalankan **ZAP** (Zed Attack Proxy, dahulu dikenali sebagai OWASP ZAP) dalam tiga mod (baseline, imbasan aktif ringan, dan API) terhadap app anda yang sedang berjalan.
 3. Membandingkan hasil DAST dengan SAST dan threat model, termasuk apa yang DAST **terlepas**.
 4. Membaiki XSS, path traversal, open redirect, header keselamatan (dan CSRF pada Laravel), kemudian mengesahkan dengan imbasan semula.
 5. Menetapkan **quality gate** DAST melalui exit code dan fail konfigurasi.
@@ -381,6 +381,6 @@ Pendekatan yang praktikal: mulakan dengan beberapa peraturan penting sebagai FAI
 
 ## Rujukan
 
-- OWASP ZAP: <https://www.zaproxy.org/docs/>
+- ZAP (dahulu OWASP ZAP): <https://www.zaproxy.org/docs/>
 - ZAP Automation Framework: <https://www.zaproxy.org/docs/automate/automation-framework/>
 - OWASP Top 10: <https://owasp.org/Top10/>

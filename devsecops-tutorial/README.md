@@ -10,7 +10,7 @@ Selepas empat hari, anda boleh:
 
 1. Menerangkan DevSecOps, shift-left dan quality gate, dan kenapa kontena serta kod yang dijana AI menambah risiko.
 2. Membuat threat model ringkas untuk sebuah app web.
-3. Menjalankan **Secret Detection** (Gitleaks), **SAST** (Semgrep), **SCA** (Trivy, `dotnet`/`composer audit`), **IaC scan** (Trivy, Checkov, hadolint, kube-linter) dan **DAST** (OWASP ZAP), serta membaca hasilnya dengan kritikal.
+3. Menjalankan **Secret Detection** (Gitleaks), **SAST** (Semgrep), **SCA** (Trivy, `dotnet`/`composer audit`), **IaC scan** (Trivy, Checkov, hadolint, kube-linter) dan **DAST** (ZAP), serta membaca hasilnya dengan kritikal.
 4. Menolak image ke **Harbor**, melihat imbasan automatik dan polisi yang menyekat image berisiko.
 5. Membina pipeline CI dengan quality gate, menjana SBOM dan menandatangani image.
 6. Mengeraskan (harden) deployment Kubernetes pada kluster k3d.

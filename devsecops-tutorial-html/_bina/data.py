@@ -149,7 +149,7 @@ PIPEDATA = [
         ["Masa diukur", "Imbasan automatik selesai dalam kira-kira 10 saat bagi imej kecil; beberapa puluh saat bagi imej besar"],
         ["Nota", "Polisi menghalang <b>pull</b>, bukan <b>push</b>. Imej yang dibina dengan attestation (OCI index) terlepas polisi."]]},
     {"name": "5 · Persekitaran ujian", "rows": [
-        ["Alat", "OWASP ZAP (baseline, pelan aktif, API)"],
+        ["Alat", "ZAP (baseline, pelan aktif, API)"],
         ["Arahan", "<code>zap-baseline.py -t URL</code> · <code>zap.sh -cmd -autorun zap-plan.yaml</code> · <code>zap-api-scan.py -t openapi.json -f openapi</code>"],
         ["Gagal bila", "Peraturan yang ditetapkan FAIL dalam fail konfigurasi (baseline exit 1); tanpa itu amaran memberi exit 2"],
         ["Masa diukur", "Baseline ≈ 35 s · pelan aktif ≈ 90 s (ASP.NET) dan ≈ 100 s (Laravel) · API ≈ 40 s. Memori puncak ≈ 0.8 GB dengan pelan; <code>zap-full-scan.py</code> memakai hingga 4.4 GB"],

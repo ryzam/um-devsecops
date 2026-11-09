@@ -39,7 +39,7 @@ Sebuah **quality gate** ialah syarat automatik dalam pipeline: jika imbasan mene
 | **SAST** | Adakah kod sumber mengandungi corak yang tidak selamat? | Semgrep |
 | **SCA** | Adakah pakej pihak ketiga ada kerentanan yang diketahui? | Trivy, `dotnet list package`, `composer audit` |
 | **IaC** | Adakah Dockerfile, manifest K8s dan Terraform tidak selamat? | Trivy config, Checkov, hadolint, kube-linter |
-| **DAST** | Adakah app yang sedang berjalan boleh diserang? | OWASP ZAP |
+| **DAST** | Adakah app yang sedang berjalan boleh diserang? | ZAP |
 
 Tiada satu pun yang cukup sendirian. Dalam bengkel ini anda akan melihat dengan data sebenar apa yang setiap alat tangkap dan terlepas.
 

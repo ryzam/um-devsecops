@@ -94,7 +94,7 @@ def lima_imbasan():
           "IaC dan imbasan imej, DAST, serta admission control.")
     stages = [("Kod", "commit dan PR"), ("Binaan", "CI"), ("Imej", "Dockerfile + registry"), ("Ujian", "app berjalan"), ("Produksi", "kluster")]
     scans = [("Secret Detection", "Gitleaks"), ("SAST · SCA", "Semgrep · Trivy fs"), ("IaC · imej", "Trivy · Checkov · Harbor"),
-             ("DAST", "OWASP ZAP"), ("Admission", "Kyverno · PSS")]
+             ("DAST", "ZAP"), ("Admission", "Kyverno · PSS")]
     d.text(10, 24, "Kos membaiki naik dari kiri ke kanan: imbas seawal mungkin", "tl")
     for i, ((a, b), (s, t)) in enumerate(zip(stages, scans)):
         x = 10 + i * 180
