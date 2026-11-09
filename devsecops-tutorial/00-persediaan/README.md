@@ -203,6 +203,8 @@ sudo update-ca-certificates
 
 Mulakan semula Docker Desktop (klik kanan ikon dulang, **Restart**).
 
+Tutup semua tetingkap pelayar dan buka semula supaya sijil baharu dikenali. **Edge dan Chrome** menggunakan stor sijil Windows, jadi tiada langkah tambahan. **Firefox** menggunakan stor sijilnya sendiri: import `ca.crt` di **Settings → Privacy & Security → View Certificates → Authorities → Import**, dan tandakan *Trust this CA to identify websites*; atau gunakan Edge atau Chrome.
+
 ### 4c. Semak
 
 Dalam terminal Ubuntu:

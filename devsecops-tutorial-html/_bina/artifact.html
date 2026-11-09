@@ -546,6 +546,7 @@ printf '[network]\ngenerateHosts = false\n' | sudo tee -a /etc/wsl.conf
 sudo update-ca-certificates
 </code></pre></div>
 <p>Mulakan semula Docker Desktop (klik kanan ikon dulang, <strong>Restart</strong>).</p>
+<p>Tutup semua tetingkap pelayar dan buka semula supaya sijil baharu dikenali. <strong>Edge dan Chrome</strong> menggunakan stor sijil Windows, jadi tiada langkah tambahan. <strong>Firefox</strong> menggunakan stor sijilnya sendiri: import <code>ca.crt</code> di <strong>Settings → Privacy &amp; Security → View Certificates → Authorities → Import</strong>, dan tandakan <em>Trust this CA to identify websites</em>; atau gunakan Edge atau Chrome.</p>
 <h3 id="persediaan-4c-semak"><a class="hl" href="#persediaan-4c-semak">4c. Semak</a></h3>
 <p>Dalam terminal Ubuntu:</p>
 <div class="code"><div class="code-bar"><span>terminal</span><button type="button" class="copy">Salin</button></div><pre><code class="language-bash">curl -s https://harbor.lab.test/api/v2.0/health | head -c 200; echo
