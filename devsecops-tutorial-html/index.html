@@ -285,7 +285,7 @@ details.pilihan[open]>summary{margin-bottom:10px;padding-bottom:10px;border-bott
 <li>Menjalankan <strong>Secret Detection</strong> (Gitleaks), <strong>SAST</strong> (Semgrep), <strong>SCA</strong> (Trivy, <code>dotnet</code>/<code>composer audit</code>), <strong>IaC scan</strong> (Trivy, Checkov, hadolint, kube-linter) dan <strong>DAST</strong> (ZAP), serta membaca hasilnya dengan kritikal.</li>
 <li>Menolak image ke <strong>Harbor</strong>, melihat imbasan automatik dan polisi yang menyekat image berisiko.</li>
 <li>Membina pipeline CI dengan quality gate, menjana SBOM dan menandatangani image.</li>
-<li>Mengeraskan (harden) deployment Kubernetes pada kluster k3d.</li>
+<li>Memperkuatkan (harden) deployment Kubernetes pada kluster k3d.</li>
 </ol>
 <h2 id="gambaran-jadual"><a class="hl" href="#gambaran-jadual">Jadual</a></h2>
 <div class="tbl"><table>
@@ -6179,7 +6179,7 @@ jobs:
 <p><strong>Hari 4, 9:00 pagi hingga 1:00 petang</strong></p>
 <p>Dalam modul ini anda akan:</p>
 <ol>
-<li>Faham kenapa <strong>pipeline itu sendiri</strong> ialah sasaran, dan kawalan asas untuk mengerasnya.</li>
+<li>Faham kenapa <strong>pipeline itu sendiri</strong> ialah sasaran, dan kawalan asas untuk memperkuatkannya.</li>
 <li>Membina pipeline dengan quality gate: secret, SAST, SCA, IaC, binaan imej, imbasan imej dan tolak ke Harbor. Pilih <strong>GitHub Actions</strong> atau <strong>GitLab CI</strong>; kedua-duanya diterangkan.</li>
 <li>Menjana <strong>SBOM</strong>, menandatangani imej dengan <strong>cosign</strong>, dan mengesahkan tandatangan.</li>
 <li>Menguji bahawa pintu <strong>benar-benar menggagalkan</strong> pipeline bila ada masalah.</li>
@@ -6727,7 +6727,7 @@ git push --force-with-lease
 </ul>
 <h2 id="m6-rujukan"><a class="hl" href="#m6-rujukan">Rujukan</a></h2>
 <ul>
-<li>Mengeraskan GitHub Actions: <a href="https://docs.github.com/actions/security-guides/security-hardening-for-github-actions" target="_blank" rel="noopener">https://docs.github.com/actions/security-guides/security-hardening-for-github-actions</a></li>
+<li>Memperkuatkan GitHub Actions: <a href="https://docs.github.com/actions/security-guides/security-hardening-for-github-actions" target="_blank" rel="noopener">https://docs.github.com/actions/security-guides/security-hardening-for-github-actions</a></li>
 <li>Keselamatan pipeline GitLab: <a href="https://docs.gitlab.com/ci/pipeline_security/" target="_blank" rel="noopener">https://docs.gitlab.com/ci/pipeline_security/</a></li>
 <li>Pembolehubah CI/CD GitLab (masked, protected, raw): <a href="https://docs.gitlab.com/ci/variables/" target="_blank" rel="noopener">https://docs.gitlab.com/ci/variables/</a></li>
 <li>cosign: <a href="https://docs.sigstore.dev/" target="_blank" rel="noopener">https://docs.sigstore.dev/</a></li>
@@ -7034,7 +7034,7 @@ index abbb9d4..eb10677 100644
 <p>Dalam modul ini anda akan:</p>
 <ol>
 <li>Mencipta kluster <strong>k3d</strong> satu node yang boleh menarik imej daripada Harbor.</li>
-<li>Melihat <strong>Pod Security Standards</strong> menolak manifest tidak selamat, dan mengeraskan manifest dengan <code>securityContext</code>.</li>
+<li>Melihat <strong>Pod Security Standards</strong> menolak manifest tidak selamat, dan memperkuatkan manifest dengan <code>securityContext</code>.</li>
 <li>Mengawal trafik dengan <strong>NetworkPolicy</strong>.</li>
 <li>Menguatkuasakan dasar dengan <strong>Kyverno</strong>: tiada <code>:latest</code>, hanya imej Harbor, dan hanya imej <strong>bertandatangan</strong>.</li>
 <li>Menyatukan semuanya dalam <strong>capstone</strong> dan dinilai.</li>
