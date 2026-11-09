@@ -139,12 +139,29 @@ def post(mid, mdir, h, sec):
     h = re.sub(r"<table>", '<div class="tbl"><table>', h).replace("</table>", "</table></div>")
     h = re.sub(r'<div data-fig="([\w-]+)"></div>', lambda m: fig_html(m.group(1)), h)
     h = re.sub(r'<div data-widget="(\w+)"></div>', lambda m: WIDGETS[m.group(1)], h)
+    # fail yang dipaparkan terus dalam teks: <div data-file="modul/fail.ext"></div> (laluan relatif kepada sumber)
+    h = re.sub(r'<div data-file="([^"]+)"></div>',
+               lambda m: file_block(m.group(1), os.path.basename(m.group(1)), "-sisip"), h)
     return h
 
 
 LANG = {".yaml": "yaml", ".yml": "yaml", ".py": "python", ".js": "javascript", ".json": "json", ".sh": "bash",
         ".ps1": "powershell", ".toml": "ini", ".tf": "hcl", ".cs": "csharp", ".php": "php", ".csproj": "xml",
         ".crt": "", ".md": ""}
+
+
+def file_block(rel, short, suffix=""):
+    """Satu fail sebagai blok <details> yang boleh dibuka dan disalin. `suffix` mengelakkan id berganda
+    apabila fail yang sama dipaparkan di dua tempat (dalam teks dan dalam 'Fail modul')."""
+    txt = open(os.path.join(SRC, rel), encoding="utf-8").read()
+    ext = os.path.splitext(rel)[1]
+    lang = LANG.get(ext, "")
+    cls = f"language-{lang}" if lang else "nohighlight"
+    size = len(txt.encode())
+    sz = f"{size / 1024:.1f} KB" if size >= 1024 else f"{size} B"
+    return (f'<details class="file" id="{file_id(rel)}{suffix}"><summary><span class="fname">{html.escape(short)}</span>'
+            f'<span class="fsize">{sz}</span></summary><div class="code"><div class="code-bar"><span>{lang or "teks"}</span>'
+            f'<button type="button" class="copy">Salin</button></div><pre><code class="{cls}">{html.escape(txt)}</code></pre></div></details>')
 
 
 def files_html(mid, mdir):
@@ -165,16 +182,7 @@ def files_html(mid, mdir):
     out = [f'<section class="files" id="{mid}-fail"><h2><a class="hl" href="#{mid}-fail">Fail modul</a></h2>'
            f'<p class="wnote">Semua fail dan skrip untuk modul ini. Klik untuk buka, kemudian salin.</p>']
     for rel in items:
-        txt = open(os.path.join(SRC, rel), encoding="utf-8").read()
-        ext = os.path.splitext(rel)[1]
-        lang = LANG.get(ext, "")
-        cls = f"language-{lang}" if lang else "nohighlight"
-        size = len(txt.encode())
-        sz = f"{size / 1024:.1f} KB" if size >= 1024 else f"{size} B"
-        short = os.path.relpath(rel, mdir)
-        out.append(f'<details class="file" id="{file_id(rel)}"><summary><span class="fname">{html.escape(short)}</span>'
-                   f'<span class="fsize">{sz}</span></summary><div class="code"><div class="code-bar"><span>{lang or "teks"}</span>'
-                   f'<button type="button" class="copy">Salin</button></div><pre><code class="{cls}">{html.escape(txt)}</code></pre></div></details>')
+        out.append(file_block(rel, os.path.relpath(rel, mdir)))
     out.append("</section>")
     return "\n".join(out)
 

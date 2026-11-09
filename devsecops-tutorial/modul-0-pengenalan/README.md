@@ -122,21 +122,48 @@ Perhatikan bahawa kebanyakan baris ini akan muncul semula sebagai temuan imbasan
 
 > Alat ini **pilihan**. Jika pemasangan gagal, siapkan bahagian A sahaja; jadual dan Threat Dragon menghasilkan maklumat yang sama.
 
-**Pasang (di Windows, bukan dalam WSL).** Muat turun `Threat-Dragon-ng-Setup-2.6.2.exe` (≈ 154 MB) daripada [halaman release](https://github.com/OWASP/threat-dragon/releases) dan jalankan pemasang. Pilih versi desktop: ia menyimpan fail di laptop anda, tanpa log masuk GitHub dan tanpa Docker. Versi ini kami tulis semasa tutorial dibina; jika halaman release sudah ada versi lebih baharu, pilih yang stabil terkini.
+**Langkah 1: simpan fail model dalam satu folder.** Model ialah dua fail JSON. Fail pertama, `kedai-bengkel-kosong.json` (rajah tanpa ancaman, untuk anda isi), dipaparkan di bawah. Fail kedua, `kedai-bengkel-jawapan.json` (kunci jawapan), ada dalam bahagian **Fail modul** di hujung modul ini dan anda menggunakannya pada akhir latihan supaya jawapan tidak kelihatan lebih awal.
 
-**Buka model.** Simpan `kedai-bengkel-kosong.json` (bahagian **Fail modul** di hujung modul ini) dalam folder repo anda. Dalam Threat Dragon:
+<div data-file="modul-0-pengenalan/kedai-bengkel-kosong.json"></div>
 
-1. Pada halaman Welcome, klik kawasan **open** dan pilih `kedai-bengkel-kosong.json`.
-2. Klik **Aliran data utama** (nama rajah) untuk membuka penyunting rajah. Anda akan melihat DFD yang sama seperti di atas: dua entiti luar, app, proses OS, pangkalan data, sistem fail dan garis sempadan kepercayaan.
+Threat Dragon dipasang di Windows, jadi simpan fail dalam folder Windows: `Documents\model-ancaman`. Dalam terminal Ubuntu (fail ini ada dalam klon `~/um-devsecops` daripada Persediaan 2):
+
+```bash
+W=$(wslpath "$(powershell.exe -NoProfile -Command '[Environment]::GetFolderPath("MyDocuments")' | tr -d '\r')")
+mkdir -p "$W/model-ancaman"
+cp ~/um-devsecops/devsecops-tutorial/modul-0-pengenalan/kedai-bengkel-kosong.json "$W/model-ancaman/"
+ls "$W/model-ancaman"
+```
+
+`ls` mesti menunjukkan `kedai-bengkel-kosong.json`. Anda kini boleh melihat folder itu dalam Windows Explorer di `Documents\model-ancaman`.
+
+Jika klon `~/um-devsecops` tiada, salin kandungan fail di atas (butang **Salin**), tampal dalam Notepad dan simpan sebagai `kedai-bengkel-kosong.json` dalam folder `Documents\model-ancaman`, dengan **Save as type: All files** dan **Encoding: UTF-8**.
+
+**Langkah 2: pasang Threat Dragon (di Windows, bukan dalam WSL).** Muat turun `Threat-Dragon-ng-Setup-2.6.2.exe` (≈ 154 MB) daripada [halaman release](https://github.com/OWASP/threat-dragon/releases) dan jalankan pemasang. Pilih versi desktop: ia menyimpan fail di laptop anda, tanpa log masuk GitHub dan tanpa Docker. Versi ini kami tulis semasa tutorial dibina; jika halaman release sudah ada versi lebih baharu, pilih yang stabil terkini.
+
+**Langkah 3: buka model.** Dalam Threat Dragon:
+
+1. Pada halaman Welcome, klik kawasan **open**. Skrin **Open / Import existing** terbuka, dengan kotak teks besar.
+2. Klik butang **Open** (ikon folder, di bawah kiri kotak teks) dan pilih `Documents\model-ancaman\kedai-bengkel-kosong.json`. Anda juga boleh menyeret fail itu dari Windows Explorer ke dalam kotak teks.
+3. Klik **Aliran data utama** (nama rajah) untuk membuka penyunting rajah. Anda akan melihat DFD yang sama seperti di atas: dua entiti luar, app, proses OS, pangkalan data, sistem fail dan garis sempadan kepercayaan.
+
+> **Jangan tampal JSON ke dalam kotak teks dan klik Import.** Pada Threat Dragon 2.6.2 (desktop) cara itu memberi `Error: An object could not be cloned`: kami menemuinya semasa menjalankan tutorial ini, dan kod sumber menunjukkan butang Import menghantar peristiwa klik, bukan nama fail, kepada aplikasi desktop, yang tidak dapat menyalinnya. Butang **Open** dan seret-lepas fail menghantar nama fail dan tidak terkesan. Jika versi lebih baharu membetulkannya, kedua-dua cara akan berfungsi.
 
 **Tambah ancaman.**
 
 1. Klik satu unsur, contohnya anak panah **Permintaan pengguna**. Sifat unsur dan ancamannya muncul di panel bawah.
 2. Klik **New Threat**. Isi **Title**, pilih **Threat Type** (enam jenis STRIDE), **Severity**, tulis **Description** dan **Mitigations**, kemudian klik **Apply**.
 3. Ulang sehingga anda ada sekurang-kurangnya **enam** ancaman, sepadan dengan jadual di bahagian A. Sempadan kepercayaan tidak boleh mempunyai ancaman; letakkan ancaman pada anak panah yang merentasinya.
-4. Klik **Save**. Fail JSON anda kini mengandungi semua ancaman.
+4. Klik **Save**. Jika aplikasi meminta lokasi fail, simpan dalam folder `Documents\model-ancaman`. Fail JSON anda kini mengandungi semua ancaman.
 
-**Ukur dengan kunci jawapan.** Buka `kedai-bengkel-jawapan.json` dengan cara yang sama dan bandingkan. Ia mengandungi sembilan ancaman, sepadan dengan jadual jawapan di atas. Soalan perbincangan:
+**Ukur dengan kunci jawapan.** Salin fail kunci jawapan ke folder yang sama (dalam terminal Ubuntu; takrifkan `W` semula jika terminal baharu):
+
+```bash
+W=$(wslpath "$(powershell.exe -NoProfile -Command '[Environment]::GetFolderPath("MyDocuments")' | tr -d '\r')")
+cp ~/um-devsecops/devsecops-tutorial/modul-0-pengenalan/kedai-bengkel-jawapan.json "$W/model-ancaman/"
+```
+
+Kemudian buka `kedai-bengkel-jawapan.json` dalam Threat Dragon dengan butang **Open** seperti Langkah 3 dan bandingkan. Ia mengandungi sembilan ancaman, sepadan dengan jadual jawapan di atas. Soalan perbincangan:
 
 - Ancaman mana yang anda lihat tetapi kunci jawapan tiada? Itu mungkin ancaman sebenar yang kami terlepas.
 - Ancaman mana yang boleh dikesan oleh imbasan (SAST, DAST, SCA) dan mana yang tidak? Tulis di sebelah setiap ancaman; jawapannya akan menjadi jelas apabila anda melihat hasil imbasan dalam modul seterusnya.

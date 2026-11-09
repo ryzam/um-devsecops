@@ -945,20 +945,587 @@ CYdJfB9LE4l7nE6veA==
 <blockquote>
 <p>Alat ini <strong>pilihan</strong>. Jika pemasangan gagal, siapkan bahagian A sahaja; jadual dan Threat Dragon menghasilkan maklumat yang sama.</p>
 </blockquote>
-<p><strong>Pasang (di Windows, bukan dalam WSL).</strong> Muat turun <code>Threat-Dragon-ng-Setup-2.6.2.exe</code> (≈ 154 MB) daripada <a href="https://github.com/OWASP/threat-dragon/releases" target="_blank" rel="noopener">halaman release</a> dan jalankan pemasang. Pilih versi desktop: ia menyimpan fail di laptop anda, tanpa log masuk GitHub dan tanpa Docker. Versi ini kami tulis semasa tutorial dibina; jika halaman release sudah ada versi lebih baharu, pilih yang stabil terkini.</p>
-<p><strong>Buka model.</strong> Simpan <code>kedai-bengkel-kosong.json</code> (bahagian <strong>Fail modul</strong> di hujung modul ini) dalam folder repo anda. Dalam Threat Dragon:</p>
+<p><strong>Langkah 1: simpan fail model dalam satu folder.</strong> Model ialah dua fail JSON. Fail pertama, <code>kedai-bengkel-kosong.json</code> (rajah tanpa ancaman, untuk anda isi), dipaparkan di bawah. Fail kedua, <code>kedai-bengkel-jawapan.json</code> (kunci jawapan), ada dalam bahagian <strong>Fail modul</strong> di hujung modul ini dan anda menggunakannya pada akhir latihan supaya jawapan tidak kelihatan lebih awal.</p>
+<details class="file" id="f-modul-0-pengenalan-kedai-bengkel-kosong-json-sisip"><summary><span class="fname">kedai-bengkel-kosong.json</span><span class="fsize">15.0 KB</span></summary><div class="code"><div class="code-bar"><span>json</span><button type="button" class="copy">Salin</button></div><pre><code class="language-json">{
+  &quot;version&quot;: &quot;2.0&quot;,
+  &quot;summary&quot;: {
+    &quot;title&quot;: &quot;Kedai Bengkel&quot;,
+    &quot;owner&quot;: &quot;Bengkel DevSecOps&quot;,
+    &quot;description&quot;: &quot;Model ancaman app lab Kedai Bengkel (ASP.NET Core dan Laravel). Sengaja rentan, untuk latihan sahaja.&quot;,
+    &quot;id&quot;: 0
+  },
+  &quot;detail&quot;: {
+    &quot;contributors&quot;: [],
+    &quot;reviewer&quot;: &quot;&quot;,
+    &quot;diagrams&quot;: [
+      {
+        &quot;id&quot;: 0,
+        &quot;title&quot;: &quot;Aliran data utama&quot;,
+        &quot;diagramType&quot;: &quot;STRIDE&quot;,
+        &quot;version&quot;: &quot;2.0&quot;,
+        &quot;thumbnail&quot;: &quot;./public/content/images/thumbnail.stride.jpg&quot;,
+        &quot;cells&quot;: [
+          {
+            &quot;position&quot;: {
+              &quot;x&quot;: 30,
+              &quot;y&quot;: 90
+            },
+            &quot;size&quot;: {
+              &quot;width&quot;: 160,
+              &quot;height&quot;: 80
+            },
+            &quot;attrs&quot;: {
+              &quot;text&quot;: {
+                &quot;text&quot;: &quot;Pengguna&quot;
+              },
+              &quot;body&quot;: {
+                &quot;stroke&quot;: &quot;#333333&quot;,
+                &quot;strokeWidth&quot;: 1,
+                &quot;strokeDasharray&quot;: null
+              }
+            },
+            &quot;shape&quot;: &quot;actor&quot;,
+            &quot;id&quot;: &quot;927402da-231b-5bdf-8a8e-7fce29153aee&quot;,
+            &quot;zIndex&quot;: 1,
+            &quot;data&quot;: {
+              &quot;name&quot;: &quot;Pengguna&quot;,
+              &quot;description&quot;: &quot;&quot;,
+              &quot;type&quot;: &quot;tm.Actor&quot;,
+              &quot;isTrustBoundary&quot;: false,
+              &quot;outOfScope&quot;: false,
+              &quot;reasonOutOfScope&quot;: &quot;&quot;,
+              &quot;threats&quot;: [],
+              &quot;hasOpenThreats&quot;: false,
+              &quot;providesAuthentication&quot;: false
+            }
+          },
+          {
+            &quot;position&quot;: {
+              &quot;x&quot;: 30,
+              &quot;y&quot;: 380
+            },
+            &quot;size&quot;: {
+              &quot;width&quot;: 160,
+              &quot;height&quot;: 80
+            },
+            &quot;attrs&quot;: {
+              &quot;text&quot;: {
+                &quot;text&quot;: &quot;Admin&quot;
+              },
+              &quot;body&quot;: {
+                &quot;stroke&quot;: &quot;#333333&quot;,
+                &quot;strokeWidth&quot;: 1,
+                &quot;strokeDasharray&quot;: null
+              }
+            },
+            &quot;shape&quot;: &quot;actor&quot;,
+            &quot;id&quot;: &quot;7e80a13e-3fe9-5de9-9519-150f033db4f9&quot;,
+            &quot;zIndex&quot;: 2,
+            &quot;data&quot;: {
+              &quot;name&quot;: &quot;Admin&quot;,
+              &quot;description&quot;: &quot;&quot;,
+              &quot;type&quot;: &quot;tm.Actor&quot;,
+              &quot;isTrustBoundary&quot;: false,
+              &quot;outOfScope&quot;: false,
+              &quot;reasonOutOfScope&quot;: &quot;&quot;,
+              &quot;threats&quot;: [],
+              &quot;hasOpenThreats&quot;: false,
+              &quot;providesAuthentication&quot;: true
+            }
+          },
+          {
+            &quot;position&quot;: {
+              &quot;x&quot;: 360,
+              &quot;y&quot;: 230
+            },
+            &quot;size&quot;: {
+              &quot;width&quot;: 120,
+              &quot;height&quot;: 120
+            },
+            &quot;attrs&quot;: {
+              &quot;text&quot;: {
+                &quot;text&quot;: &quot;App Kedai\nBengkel&quot;
+              },
+              &quot;body&quot;: {
+                &quot;stroke&quot;: &quot;#333333&quot;,
+                &quot;strokeWidth&quot;: 1,
+                &quot;strokeDasharray&quot;: null
+              }
+            },
+            &quot;shape&quot;: &quot;process&quot;,
+            &quot;id&quot;: &quot;b4153a5a-f602-541f-ad47-5b78d7d7083d&quot;,
+            &quot;zIndex&quot;: 3,
+            &quot;data&quot;: {
+              &quot;name&quot;: &quot;App Kedai\nBengkel&quot;,
+              &quot;description&quot;: &quot;&quot;,
+              &quot;type&quot;: &quot;tm.Process&quot;,
+              &quot;isTrustBoundary&quot;: false,
+              &quot;outOfScope&quot;: false,
+              &quot;reasonOutOfScope&quot;: &quot;&quot;,
+              &quot;threats&quot;: [],
+              &quot;hasOpenThreats&quot;: false
+            }
+          },
+          {
+            &quot;position&quot;: {
+              &quot;x&quot;: 660,
+              &quot;y&quot;: 60
+            },
+            &quot;size&quot;: {
+              &quot;width&quot;: 170,
+              &quot;height&quot;: 80
+            },
+            &quot;attrs&quot;: {
+              &quot;text&quot;: {
+                &quot;text&quot;: &quot;Pangkalan data SQLite&quot;
+              },
+              &quot;topLine&quot;: {
+                &quot;stroke&quot;: &quot;#333333&quot;,
+                &quot;strokeWidth&quot;: 1,
+                &quot;strokeDasharray&quot;: null
+              },
+              &quot;bottomLine&quot;: {
+                &quot;stroke&quot;: &quot;#333333&quot;,
+                &quot;strokeWidth&quot;: 1,
+                &quot;strokeDasharray&quot;: null
+              }
+            },
+            &quot;shape&quot;: &quot;store&quot;,
+            &quot;id&quot;: &quot;b1f676f9-b8d0-56c5-bbc3-216f0e7f298d&quot;,
+            &quot;zIndex&quot;: 4,
+            &quot;data&quot;: {
+              &quot;name&quot;: &quot;Pangkalan data SQLite&quot;,
+              &quot;description&quot;: &quot;&quot;,
+              &quot;type&quot;: &quot;tm.Store&quot;,
+              &quot;isTrustBoundary&quot;: false,
+              &quot;outOfScope&quot;: false,
+              &quot;reasonOutOfScope&quot;: &quot;&quot;,
+              &quot;threats&quot;: [],
+              &quot;hasOpenThreats&quot;: false,
+              &quot;isALog&quot;: false,
+              &quot;storesCredentials&quot;: true,
+              &quot;isEncrypted&quot;: false,
+              &quot;isSigned&quot;: false
+            }
+          },
+          {
+            &quot;position&quot;: {
+              &quot;x&quot;: 670,
+              &quot;y&quot;: 240
+            },
+            &quot;size&quot;: {
+              &quot;width&quot;: 150,
+              &quot;height&quot;: 100
+            },
+            &quot;attrs&quot;: {
+              &quot;text&quot;: {
+                &quot;text&quot;: &quot;Proses OS\nping&quot;
+              },
+              &quot;body&quot;: {
+                &quot;stroke&quot;: &quot;#333333&quot;,
+                &quot;strokeWidth&quot;: 1,
+                &quot;strokeDasharray&quot;: null
+              }
+            },
+            &quot;shape&quot;: &quot;process&quot;,
+            &quot;id&quot;: &quot;10759350-a833-5be4-929c-e25fd2ae719c&quot;,
+            &quot;zIndex&quot;: 5,
+            &quot;data&quot;: {
+              &quot;name&quot;: &quot;Proses OS\nping&quot;,
+              &quot;description&quot;: &quot;&quot;,
+              &quot;type&quot;: &quot;tm.Process&quot;,
+              &quot;isTrustBoundary&quot;: false,
+              &quot;outOfScope&quot;: false,
+              &quot;reasonOutOfScope&quot;: &quot;&quot;,
+              &quot;threats&quot;: [],
+              &quot;hasOpenThreats&quot;: false
+            }
+          },
+          {
+            &quot;position&quot;: {
+              &quot;x&quot;: 660,
+              &quot;y&quot;: 440
+            },
+            &quot;size&quot;: {
+              &quot;width&quot;: 170,
+              &quot;height&quot;: 80
+            },
+            &quot;attrs&quot;: {
+              &quot;text&quot;: {
+                &quot;text&quot;: &quot;Sistem fail&quot;
+              },
+              &quot;topLine&quot;: {
+                &quot;stroke&quot;: &quot;#333333&quot;,
+                &quot;strokeWidth&quot;: 1,
+                &quot;strokeDasharray&quot;: null
+              },
+              &quot;bottomLine&quot;: {
+                &quot;stroke&quot;: &quot;#333333&quot;,
+                &quot;strokeWidth&quot;: 1,
+                &quot;strokeDasharray&quot;: null
+              }
+            },
+            &quot;shape&quot;: &quot;store&quot;,
+            &quot;id&quot;: &quot;8524f606-b501-542f-ae4f-b09410017c5b&quot;,
+            &quot;zIndex&quot;: 6,
+            &quot;data&quot;: {
+              &quot;name&quot;: &quot;Sistem fail&quot;,
+              &quot;description&quot;: &quot;&quot;,
+              &quot;type&quot;: &quot;tm.Store&quot;,
+              &quot;isTrustBoundary&quot;: false,
+              &quot;outOfScope&quot;: false,
+              &quot;reasonOutOfScope&quot;: &quot;&quot;,
+              &quot;threats&quot;: [],
+              &quot;hasOpenThreats&quot;: false,
+              &quot;isALog&quot;: false,
+              &quot;storesCredentials&quot;: true,
+              &quot;isEncrypted&quot;: false,
+              &quot;isSigned&quot;: false
+            }
+          },
+          {
+            &quot;shape&quot;: &quot;flow&quot;,
+            &quot;attrs&quot;: {
+              &quot;line&quot;: {
+                &quot;stroke&quot;: &quot;#333333&quot;,
+                &quot;strokeWidth&quot;: 1,
+                &quot;targetMarker&quot;: {
+                  &quot;name&quot;: &quot;block&quot;
+                },
+                &quot;strokeDasharray&quot;: null
+              }
+            },
+            &quot;width&quot;: 200,
+            &quot;height&quot;: 100,
+            &quot;zIndex&quot;: 7,
+            &quot;connector&quot;: &quot;smooth&quot;,
+            &quot;data&quot;: {
+              &quot;type&quot;: &quot;tm.Flow&quot;,
+              &quot;name&quot;: &quot;Permintaan pengguna&quot;,
+              &quot;description&quot;: &quot;&quot;,
+              &quot;outOfScope&quot;: false,
+              &quot;reasonOutOfScope&quot;: &quot;&quot;,
+              &quot;protocol&quot;: &quot;HTTP&quot;,
+              &quot;isEncrypted&quot;: false,
+              &quot;isPublicNetwork&quot;: true,
+              &quot;hasOpenThreats&quot;: false,
+              &quot;threats&quot;: [],
+              &quot;isTrustBoundary&quot;: false
+            },
+            &quot;id&quot;: &quot;c0fad95d-09d3-5119-ac2d-bba1993bbd0c&quot;,
+            &quot;labels&quot;: [
+              {
+                &quot;position&quot;: 0.5,
+                &quot;attrs&quot;: {
+                  &quot;label&quot;: {
+                    &quot;text&quot;: &quot;Permintaan pengguna (HTTP)&quot;
+                  }
+                }
+              }
+            ],
+            &quot;source&quot;: {
+              &quot;cell&quot;: &quot;927402da-231b-5bdf-8a8e-7fce29153aee&quot;
+            },
+            &quot;target&quot;: {
+              &quot;cell&quot;: &quot;b4153a5a-f602-541f-ad47-5b78d7d7083d&quot;
+            },
+            &quot;vertices&quot;: [
+              {
+                &quot;x&quot;: 280,
+                &quot;y&quot;: 150
+              }
+            ]
+          },
+          {
+            &quot;shape&quot;: &quot;flow&quot;,
+            &quot;attrs&quot;: {
+              &quot;line&quot;: {
+                &quot;stroke&quot;: &quot;#333333&quot;,
+                &quot;strokeWidth&quot;: 1,
+                &quot;targetMarker&quot;: {
+                  &quot;name&quot;: &quot;block&quot;
+                },
+                &quot;strokeDasharray&quot;: null
+              }
+            },
+            &quot;width&quot;: 200,
+            &quot;height&quot;: 100,
+            &quot;zIndex&quot;: 8,
+            &quot;connector&quot;: &quot;smooth&quot;,
+            &quot;data&quot;: {
+              &quot;type&quot;: &quot;tm.Flow&quot;,
+              &quot;name&quot;: &quot;Permintaan admin&quot;,
+              &quot;description&quot;: &quot;&quot;,
+              &quot;outOfScope&quot;: false,
+              &quot;reasonOutOfScope&quot;: &quot;&quot;,
+              &quot;protocol&quot;: &quot;HTTP&quot;,
+              &quot;isEncrypted&quot;: false,
+              &quot;isPublicNetwork&quot;: true,
+              &quot;hasOpenThreats&quot;: false,
+              &quot;threats&quot;: [],
+              &quot;isTrustBoundary&quot;: false
+            },
+            &quot;id&quot;: &quot;792af0b0-518a-59f9-8a63-029133570973&quot;,
+            &quot;labels&quot;: [
+              {
+                &quot;position&quot;: 0.5,
+                &quot;attrs&quot;: {
+                  &quot;label&quot;: {
+                    &quot;text&quot;: &quot;Permintaan admin (HTTP)&quot;
+                  }
+                }
+              }
+            ],
+            &quot;source&quot;: {
+              &quot;cell&quot;: &quot;7e80a13e-3fe9-5de9-9519-150f033db4f9&quot;
+            },
+            &quot;target&quot;: {
+              &quot;cell&quot;: &quot;b4153a5a-f602-541f-ad47-5b78d7d7083d&quot;
+            },
+            &quot;vertices&quot;: [
+              {
+                &quot;x&quot;: 280,
+                &quot;y&quot;: 420
+              }
+            ]
+          },
+          {
+            &quot;shape&quot;: &quot;flow&quot;,
+            &quot;attrs&quot;: {
+              &quot;line&quot;: {
+                &quot;stroke&quot;: &quot;#333333&quot;,
+                &quot;strokeWidth&quot;: 1,
+                &quot;targetMarker&quot;: {
+                  &quot;name&quot;: &quot;block&quot;
+                },
+                &quot;strokeDasharray&quot;: null
+              }
+            },
+            &quot;width&quot;: 200,
+            &quot;height&quot;: 100,
+            &quot;zIndex&quot;: 9,
+            &quot;connector&quot;: &quot;smooth&quot;,
+            &quot;data&quot;: {
+              &quot;type&quot;: &quot;tm.Flow&quot;,
+              &quot;name&quot;: &quot;Query SQL&quot;,
+              &quot;description&quot;: &quot;&quot;,
+              &quot;outOfScope&quot;: false,
+              &quot;reasonOutOfScope&quot;: &quot;&quot;,
+              &quot;protocol&quot;: &quot;SQLite&quot;,
+              &quot;isEncrypted&quot;: false,
+              &quot;isPublicNetwork&quot;: false,
+              &quot;hasOpenThreats&quot;: false,
+              &quot;threats&quot;: [],
+              &quot;isTrustBoundary&quot;: false
+            },
+            &quot;id&quot;: &quot;0e163f94-df9d-5e05-9b16-b26415a71124&quot;,
+            &quot;labels&quot;: [
+              {
+                &quot;position&quot;: 0.5,
+                &quot;attrs&quot;: {
+                  &quot;label&quot;: {
+                    &quot;text&quot;: &quot;Query SQL (SQLite)&quot;
+                  }
+                }
+              }
+            ],
+            &quot;source&quot;: {
+              &quot;cell&quot;: &quot;b4153a5a-f602-541f-ad47-5b78d7d7083d&quot;
+            },
+            &quot;target&quot;: {
+              &quot;cell&quot;: &quot;b1f676f9-b8d0-56c5-bbc3-216f0e7f298d&quot;
+            },
+            &quot;vertices&quot;: [
+              {
+                &quot;x&quot;: 560,
+                &quot;y&quot;: 110
+              }
+            ]
+          },
+          {
+            &quot;shape&quot;: &quot;flow&quot;,
+            &quot;attrs&quot;: {
+              &quot;line&quot;: {
+                &quot;stroke&quot;: &quot;#333333&quot;,
+                &quot;strokeWidth&quot;: 1,
+                &quot;targetMarker&quot;: {
+                  &quot;name&quot;: &quot;block&quot;
+                },
+                &quot;strokeDasharray&quot;: null
+              }
+            },
+            &quot;width&quot;: 200,
+            &quot;height&quot;: 100,
+            &quot;zIndex&quot;: 10,
+            &quot;connector&quot;: &quot;smooth&quot;,
+            &quot;data&quot;: {
+              &quot;type&quot;: &quot;tm.Flow&quot;,
+              &quot;name&quot;: &quot;Arahan ping&quot;,
+              &quot;description&quot;: &quot;&quot;,
+              &quot;outOfScope&quot;: false,
+              &quot;reasonOutOfScope&quot;: &quot;&quot;,
+              &quot;protocol&quot;: &quot;shell&quot;,
+              &quot;isEncrypted&quot;: false,
+              &quot;isPublicNetwork&quot;: false,
+              &quot;hasOpenThreats&quot;: false,
+              &quot;threats&quot;: [],
+              &quot;isTrustBoundary&quot;: false
+            },
+            &quot;id&quot;: &quot;9832890a-ec49-5293-894f-cf6b6da225b3&quot;,
+            &quot;labels&quot;: [
+              {
+                &quot;position&quot;: 0.5,
+                &quot;attrs&quot;: {
+                  &quot;label&quot;: {
+                    &quot;text&quot;: &quot;Arahan ping (shell)&quot;
+                  }
+                }
+              }
+            ],
+            &quot;source&quot;: {
+              &quot;cell&quot;: &quot;b4153a5a-f602-541f-ad47-5b78d7d7083d&quot;
+            },
+            &quot;target&quot;: {
+              &quot;cell&quot;: &quot;10759350-a833-5be4-929c-e25fd2ae719c&quot;
+            },
+            &quot;vertices&quot;: []
+          },
+          {
+            &quot;shape&quot;: &quot;flow&quot;,
+            &quot;attrs&quot;: {
+              &quot;line&quot;: {
+                &quot;stroke&quot;: &quot;#333333&quot;,
+                &quot;strokeWidth&quot;: 1,
+                &quot;targetMarker&quot;: {
+                  &quot;name&quot;: &quot;block&quot;
+                },
+                &quot;strokeDasharray&quot;: null
+              }
+            },
+            &quot;width&quot;: 200,
+            &quot;height&quot;: 100,
+            &quot;zIndex&quot;: 11,
+            &quot;connector&quot;: &quot;smooth&quot;,
+            &quot;data&quot;: {
+              &quot;type&quot;: &quot;tm.Flow&quot;,
+              &quot;name&quot;: &quot;Baca fail&quot;,
+              &quot;description&quot;: &quot;&quot;,
+              &quot;outOfScope&quot;: false,
+              &quot;reasonOutOfScope&quot;: &quot;&quot;,
+              &quot;protocol&quot;: &quot;sistem fail&quot;,
+              &quot;isEncrypted&quot;: false,
+              &quot;isPublicNetwork&quot;: false,
+              &quot;hasOpenThreats&quot;: false,
+              &quot;threats&quot;: [],
+              &quot;isTrustBoundary&quot;: false
+            },
+            &quot;id&quot;: &quot;696ad771-9dfa-5eea-aec2-1a6d373f5e0f&quot;,
+            &quot;labels&quot;: [
+              {
+                &quot;position&quot;: 0.5,
+                &quot;attrs&quot;: {
+                  &quot;label&quot;: {
+                    &quot;text&quot;: &quot;Baca fail (sistem fail)&quot;
+                  }
+                }
+              }
+            ],
+            &quot;source&quot;: {
+              &quot;cell&quot;: &quot;b4153a5a-f602-541f-ad47-5b78d7d7083d&quot;
+            },
+            &quot;target&quot;: {
+              &quot;cell&quot;: &quot;8524f606-b501-542f-ae4f-b09410017c5b&quot;
+            },
+            &quot;vertices&quot;: [
+              {
+                &quot;x&quot;: 560,
+                &quot;y&quot;: 480
+              }
+            ]
+          },
+          {
+            &quot;shape&quot;: &quot;trust-boundary-curve&quot;,
+            &quot;attrs&quot;: {
+              &quot;line&quot;: {
+                &quot;targetMarker&quot;: &quot;&quot;,
+                &quot;sourceMarker&quot;: &quot;&quot;
+              }
+            },
+            &quot;width&quot;: 200,
+            &quot;height&quot;: 100,
+            &quot;zIndex&quot;: 12,
+            &quot;connector&quot;: &quot;smooth&quot;,
+            &quot;labels&quot;: [
+              {
+                &quot;attrs&quot;: {
+                  &quot;text&quot;: {
+                    &quot;text&quot;: &quot;Sempadan server&quot;
+                  }
+                }
+              }
+            ],
+            &quot;data&quot;: {
+              &quot;type&quot;: &quot;tm.Boundary&quot;,
+              &quot;name&quot;: &quot;Sempadan server&quot;,
+              &quot;description&quot;: &quot;&quot;,
+              &quot;isTrustBoundary&quot;: true,
+              &quot;hasOpenThreats&quot;: false
+            },
+            &quot;id&quot;: &quot;6fe4244b-4689-5897-ac6f-8e51e9ba2e09&quot;,
+            &quot;source&quot;: {
+              &quot;x&quot;: 290,
+              &quot;y&quot;: 20
+            },
+            &quot;target&quot;: {
+              &quot;x&quot;: 290,
+              &quot;y&quot;: 520
+            },
+            &quot;vertices&quot;: [
+              {
+                &quot;x&quot;: 290,
+                &quot;y&quot;: 270
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    &quot;diagramTop&quot;: 1,
+    &quot;threatTop&quot;: 0
+  }
+}
+</code></pre></div></details>
+
+<p>Threat Dragon dipasang di Windows, jadi simpan fail dalam folder Windows: <code>Documents\model-ancaman</code>. Dalam terminal Ubuntu (fail ini ada dalam klon <code>~/um-devsecops</code> daripada Persediaan 2):</p>
+<div class="code"><div class="code-bar"><span>terminal</span><button type="button" class="copy">Salin</button></div><pre><code class="language-bash">W=$(wslpath &quot;$(powershell.exe -NoProfile -Command '[Environment]::GetFolderPath(&quot;MyDocuments&quot;)' | tr -d '\r')&quot;)
+mkdir -p &quot;$W/model-ancaman&quot;
+cp ~/um-devsecops/devsecops-tutorial/modul-0-pengenalan/kedai-bengkel-kosong.json &quot;$W/model-ancaman/&quot;
+ls &quot;$W/model-ancaman&quot;
+</code></pre></div>
+<p><code>ls</code> mesti menunjukkan <code>kedai-bengkel-kosong.json</code>. Anda kini boleh melihat folder itu dalam Windows Explorer di <code>Documents\model-ancaman</code>.</p>
+<p>Jika klon <code>~/um-devsecops</code> tiada, salin kandungan fail di atas (butang <strong>Salin</strong>), tampal dalam Notepad dan simpan sebagai <code>kedai-bengkel-kosong.json</code> dalam folder <code>Documents\model-ancaman</code>, dengan <strong>Save as type: All files</strong> dan <strong>Encoding: UTF-8</strong>.</p>
+<p><strong>Langkah 2: pasang Threat Dragon (di Windows, bukan dalam WSL).</strong> Muat turun <code>Threat-Dragon-ng-Setup-2.6.2.exe</code> (≈ 154 MB) daripada <a href="https://github.com/OWASP/threat-dragon/releases" target="_blank" rel="noopener">halaman release</a> dan jalankan pemasang. Pilih versi desktop: ia menyimpan fail di laptop anda, tanpa log masuk GitHub dan tanpa Docker. Versi ini kami tulis semasa tutorial dibina; jika halaman release sudah ada versi lebih baharu, pilih yang stabil terkini.</p>
+<p><strong>Langkah 3: buka model.</strong> Dalam Threat Dragon:</p>
 <ol>
-<li>Pada halaman Welcome, klik kawasan <strong>open</strong> dan pilih <code>kedai-bengkel-kosong.json</code>.</li>
+<li>Pada halaman Welcome, klik kawasan <strong>open</strong>. Skrin <strong>Open / Import existing</strong> terbuka, dengan kotak teks besar.</li>
+<li>Klik butang <strong>Open</strong> (ikon folder, di bawah kiri kotak teks) dan pilih <code>Documents\model-ancaman\kedai-bengkel-kosong.json</code>. Anda juga boleh menyeret fail itu dari Windows Explorer ke dalam kotak teks.</li>
 <li>Klik <strong>Aliran data utama</strong> (nama rajah) untuk membuka penyunting rajah. Anda akan melihat DFD yang sama seperti di atas: dua entiti luar, app, proses OS, pangkalan data, sistem fail dan garis sempadan kepercayaan.</li>
 </ol>
+<blockquote>
+<p><strong>Jangan tampal JSON ke dalam kotak teks dan klik Import.</strong> Pada Threat Dragon 2.6.2 (desktop) cara itu memberi <code>Error: An object could not be cloned</code>: kami menemuinya semasa menjalankan tutorial ini, dan kod sumber menunjukkan butang Import menghantar peristiwa klik, bukan nama fail, kepada aplikasi desktop, yang tidak dapat menyalinnya. Butang <strong>Open</strong> dan seret-lepas fail menghantar nama fail dan tidak terkesan. Jika versi lebih baharu membetulkannya, kedua-dua cara akan berfungsi.</p>
+</blockquote>
 <p><strong>Tambah ancaman.</strong></p>
 <ol>
 <li>Klik satu unsur, contohnya anak panah <strong>Permintaan pengguna</strong>. Sifat unsur dan ancamannya muncul di panel bawah.</li>
 <li>Klik <strong>New Threat</strong>. Isi <strong>Title</strong>, pilih <strong>Threat Type</strong> (enam jenis STRIDE), <strong>Severity</strong>, tulis <strong>Description</strong> dan <strong>Mitigations</strong>, kemudian klik <strong>Apply</strong>.</li>
 <li>Ulang sehingga anda ada sekurang-kurangnya <strong>enam</strong> ancaman, sepadan dengan jadual di bahagian A. Sempadan kepercayaan tidak boleh mempunyai ancaman; letakkan ancaman pada anak panah yang merentasinya.</li>
-<li>Klik <strong>Save</strong>. Fail JSON anda kini mengandungi semua ancaman.</li>
+<li>Klik <strong>Save</strong>. Jika aplikasi meminta lokasi fail, simpan dalam folder <code>Documents\model-ancaman</code>. Fail JSON anda kini mengandungi semua ancaman.</li>
 </ol>
-<p><strong>Ukur dengan kunci jawapan.</strong> Buka <code>kedai-bengkel-jawapan.json</code> dengan cara yang sama dan bandingkan. Ia mengandungi sembilan ancaman, sepadan dengan jadual jawapan di atas. Soalan perbincangan:</p>
+<p><strong>Ukur dengan kunci jawapan.</strong> Salin fail kunci jawapan ke folder yang sama (dalam terminal Ubuntu; takrifkan <code>W</code> semula jika terminal baharu):</p>
+<div class="code"><div class="code-bar"><span>terminal</span><button type="button" class="copy">Salin</button></div><pre><code class="language-bash">W=$(wslpath &quot;$(powershell.exe -NoProfile -Command '[Environment]::GetFolderPath(&quot;MyDocuments&quot;)' | tr -d '\r')&quot;)
+cp ~/um-devsecops/devsecops-tutorial/modul-0-pengenalan/kedai-bengkel-jawapan.json &quot;$W/model-ancaman/&quot;
+</code></pre></div>
+<p>Kemudian buka <code>kedai-bengkel-jawapan.json</code> dalam Threat Dragon dengan butang <strong>Open</strong> seperti Langkah 3 dan bandingkan. Ia mengandungi sembilan ancaman, sepadan dengan jadual jawapan di atas. Soalan perbincangan:</p>
 <ul>
 <li>Ancaman mana yang anda lihat tetapi kunci jawapan tiada? Itu mungkin ancaman sebenar yang kami terlepas.</li>
 <li>Ancaman mana yang boleh dikesan oleh imbasan (SAST, DAST, SCA) dan mana yang tidak? Tulis di sebelah setiap ancaman; jawapannya akan menjadi jelas apabila anda melihat hasil imbasan dalam modul seterusnya.</li>
