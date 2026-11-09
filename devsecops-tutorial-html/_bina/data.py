@@ -5,6 +5,7 @@ CAPTIONS = {
     "lima-imbasan": "Lima jenis imbasan dan di mana setiap satu berada dalam perjalanan kod ke produksi.",
     "dfd-kedai": "DFD Kedai Bengkel dengan sempadan kepercayaan dan tag STRIDE pada setiap aliran yang merentas sempadan.",
     "seni-bina-makmal": "Laptop anda menjalankan app, alat imbasan dan kluster k3d; imej dihantar ke Harbor di Linode melalui HTTPS.",
+    "alat-di-mana": "Alat di laptop anda (dijalankan sendiri) dan alat di server Linode (berjalan automatik selepas git push).",
     "aliran-harbor": "Imej ditolak, diimbas secara automatik, dan polisi menyekat pull bagi imej dengan kerentanan High atau lebih tinggi.",
     "rantaian-bekalan": "Setiap peringkat menambah bukti (SBOM, tandatangan) yang disemak oleh Kyverno sebelum pod berjalan.",
     "lapisan-hardening": "Pertahanan berlapis: admission, Pod Security Standards, securityContext dan NetworkPolicy.",

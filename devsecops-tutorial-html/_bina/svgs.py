@@ -225,7 +225,54 @@ def lapisan_hardening():
     return d
 
 
+def alat_di_mana():
+    d = D("ad", 900, 574, "Alat di laptop pembangun dan alat di server",
+          "Laptop pembangun menjalankan git, pre-commit hook Gitleaks, kontena imbasan melalui alat.sh, app lab dan kluster k3d. "
+          "Selepas git push ke GitLab di server Linode, GitLab Runner menjalankan job imbasan dan binaan imej, menolak imej ke Harbor dan menandatanganinya. "
+          "Harbor juga mengimbas imej dengan Trivy dan menguatkuasakan polisi.")
+    # Laptop
+    d.rect(10, 20, 410, 484, "zone2", 14)
+    d.text(26, 46, "Laptop anda · Windows + WSL2 + Docker Desktop", "tl")
+    d.node(30, 64, 370, 56, "Git", "git · identiti · remote gitlab", "box")
+    d.node(30, 134, 370, 56, "Pre-commit hook", "Gitleaks menyekat commit yang ada secret", "acc")
+    d.rect(30, 204, 370, 92, "acc")
+    d.text(215, 228, "Kontena imbasan (fungsi dalam alat.sh)", "th", "middle")
+    d.text(215, 252, "gitleaks · semgrep · trivy · checkov", "ts m", "middle")
+    d.text(215, 270, "hadolint · kube-linter · zap · cosign", "ts m", "middle")
+    d.text(215, 288, "dijalankan oleh anda, bila-bila masa", "ts", "middle")
+    d.node(30, 310, 370, 56, "App lab", "aspnet-app atau laravel-app dalam Docker", "warn")
+    d.node(30, 380, 370, 56, "Kluster k3d", "kubectl · Kyverno · NetworkPolicy (Hari 4)", "box")
+    d.node(30, 450, 370, 40, "Threat Dragon (pilihan, Windows)", None, "box", "t")
+    # Server
+    d.rect(520, 20, 370, 484, "zone", 14)
+    d.text(536, 46, "Server Linode · dikongsi, instruktur sediakan", "tl")
+    d.node(540, 64, 330, 64, "GitLab", "repo + CI/CD · gitlab.lab.test:8929", "acc")
+    d.rect(540, 152, 330, 176, "box")
+    d.text(556, 178, "GitLab Runner (Docker)", "th")
+    d.text(556, 202, "job imbas:", "ts")
+    d.text(556, 220, "secret-detection · sast · sca · iac", "ts m")
+    d.text(556, 246, "job imej:", "ts")
+    d.text(556, 264, "build · Trivy imej · SBOM", "ts m")
+    d.text(556, 282, "push ke Harbor · cosign sign", "ts m")
+    d.text(556, 312, "alat sama seperti di laptop, berjalan secara automatik", "ts")
+    d.node(540, 352, 330, 64, "Harbor", "registry + Trivy + polisi · harbor.lab.test:443", "acc")
+    d.text(556, 444, "Jika memilih GitHub Actions, runner dihoskan", "ts")
+    d.text(556, 462, "oleh GitHub dan bukan di Linode; Harbor kekal sama.", "ts")
+    # Anak panah
+    d.path("M400,92 H538", acc=True)
+    d.text(470, 82, "git push", "ta", "middle")
+    d.text(470, 112, "HTTPS 8929", "ts m", "middle")
+    d.path("M705,128 V150", acc=True)
+    d.path("M705,328 V350", acc=True)
+    d.path("M400,338 H470 V392 H538", dash=True)
+    d.text(470, 376, "docker push", "ts", "middle")
+    d.text(470, 424, "(Modul 4)", "ts", "middle")
+    d.rect(10, 518, 880, 44, "zone", 8)
+    d.text(26, 545, "Alat yang sama berjalan di dua tempat: di laptop untuk belajar dan maklum balas pantas, di server sebagai pintu yang tidak boleh dielak.", "ts")
+    return d
+
+
 ALL = {
     "lima-imbasan": lima_imbasan, "dfd-kedai": dfd_kedai, "seni-bina-makmal": seni_bina_makmal,
-    "aliran-harbor": aliran_harbor, "rantaian-bekalan": rantaian_bekalan, "lapisan-hardening": lapisan_hardening,
+    "alat-di-mana": alat_di_mana, "aliran-harbor": aliran_harbor, "rantaian-bekalan": rantaian_bekalan, "lapisan-hardening": lapisan_hardening,
 }

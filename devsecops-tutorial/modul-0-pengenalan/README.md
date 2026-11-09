@@ -43,6 +43,22 @@ Sebuah **quality gate** ialah syarat automatik dalam pipeline: jika imbasan mene
 
 Tiada satu pun yang cukup sendirian. Dalam bengkel ini anda akan melihat dengan data sebenar apa yang setiap alat tangkap dan terlepas.
 
+### Di mana setiap alat berjalan
+
+Alat yang sama berjalan di **dua tempat**, dengan tujuan berbeza:
+
+<div data-fig="alat-di-mana"></div>
+
+| | Laptop anda | Server Linode |
+|---|---|---|
+| **Siapa yang menjalankan** | Anda, dengan menaip arahan (atau hook semasa `git commit`) | GitLab Runner, secara automatik selepas setiap `git push` |
+| **Alat** | Git, pre-commit hook, kontena imbasan (`alat.sh`), app lab, kluster k3d | GitLab, GitLab Runner, Harbor (dengan scanner Trivy) |
+| **Tujuan** | Belajar, dan maklum balas pantas sebelum kod keluar dari laptop | Pintu yang menyekat kod berisiko, walaupun pembangun terlupa atau melangkau semakan setempat |
+| **Boleh dielak?** | Ya (`--no-verify`, `SKIP=`, tidak menjalankan imbasan) | Tidak, jika `main` dilindungi dan "Pipelines must succeed" dihidupkan (Modul 6) |
+| **Bahan dalam bengkel** | Modul 1 hingga 5, dan 7 | Modul 4 (Harbor) dan Modul 6 (pipeline) |
+
+Tiada alat imbasan yang dipasang pada laptop: setiap satu ialah kontena Docker yang dipanggil melalui fungsi dalam `alat.sh`, dan versi yang sama digunakan oleh pipeline di server. Maka alat dan versinya sama di kedua-dua tempat; perbezaan keputusan biasanya datang daripada fail yang diimbas (contohnya fail yang belum di-commit hanya wujud di laptop).
+
 ### Kenapa kontena dan AI mengubah risiko
 
 - **Kontena** membungkus app bersama OS dan pakejnya. Satu image membawa ratusan pakej yang anda tidak tulis. Image lama atau berasaskan SDK membawa kerentanan, dan konfigurasi runtime (root, privileged) menentukan seberapa buruk kesan jika app dieksploit.
