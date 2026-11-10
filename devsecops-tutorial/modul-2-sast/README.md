@@ -7,7 +7,7 @@ Dalam modul ini anda akan:
 1. Faham apa SAST boleh dan tidak boleh lakukan, dan kenapa hasilnya bergantung pada **set peraturan**.
 2. Menjalankan **Semgrep** pada app anda, membandingkan set peraturan dan membuat **triaj** (benar atau positif palsu).
 3. Mengenal pasti kelemahan yang SAST **terlepas**, dan memadankannya dengan threat model anda.
-4. Membaiki SQL injection, command injection dan deserialization, kemudian mengesahkan pembaikan dengan ujian fungsi **dan** imbasan semula.
+4. Menerapkan dan memahami pembaikan untuk SQL injection, command injection dan deserialization, kemudian mengesahkannya dengan ujian fungsi **dan** imbasan semula.
 5. Mengimbas kod yang dijana AI dan mengaplikasikan **quality gate** serta pengurusan temuan.
 6. Menjalankan Semgrep sebagai pintu dalam **GitLab CI** dan membaca keputusannya.
 
@@ -300,33 +300,63 @@ Dua kategori ini yang DAST (Modul 5) dan ujian manual akan tutup. Itulah sebab s
 
 **Tujuan.** Membaiki kelemahan yang SAST nampak, dan **mengesahkan** pembaikan itu dengan dua cara.
 
-Cuba baiki sendiri dahulu (selama 15 minit): SQL injection pada `/search` dan `/login`, command injection pada `/ping`, dan deserialization pada `/api/import`. Panduan:
+Pembaikan sudah disediakan sebagai **fail ganti** supaya masa makmal digunakan untuk **memahami dan mengesahkan**, bukan menulis semula kod. Ia membaiki empat kelemahan: SQL injection pada `/search` dan `/login`, command injection pada `/ping`, dan deserialization pada `/api/import`.
 
-- SQL: gunakan **query berparameter**, jangan gabung rentetan.
-- Command injection: elak shell; hantar hujah sebagai senarai; sahkan input dengan senarai putih aksara.
-- Deserialization: jangan benarkan jenis sewenang-wenangnya.
-
-Kemudian bandingkan dengan tampalan rujukan. Jika anda sudah mengubah `Program.cs` (Trek A) atau `routes/web.php` (Trek B), simpan kerja anda dalam cawangan lain dahulu (`git switch -c kerja-sendiri && git commit -am "kerja sendiri" && git switch -`). Simpan fail tampalan dari bahagian **Fail modul** dalam folder repo, kemudian:
+**Langkah 1: gantikan fail yang bermasalah.** Fail ganti ada dalam repo tutorial (`~/um-devsecops`, juga di bahagian **Fail modul**). Dari folder `~/devsecops-lab`:
 
 <div class="trk trk-a" markdown="1">
 
 ```bash
-git apply --check aspnet-sast.patch && git apply aspnet-sast.patch
+cp ~/um-devsecops/devsecops-tutorial/modul-2-sast/aspnet-Program-baiki.cs aspnet-app/Program.cs
 git diff --stat
 ```
+
+Anda mesti melihat `aspnet-app/Program.cs | 16 +++++++++++-----` dan `1 file changed`.
 
 </div>
 
 <div class="trk trk-b" markdown="1">
 
 ```bash
-git apply --check laravel-sast.patch && git apply laravel-sast.patch
+cp ~/um-devsecops/devsecops-tutorial/modul-2-sast/laravel-web-baiki.php laravel-app/routes/web.php
 git diff --stat
 ```
 
+Anda mesti melihat `laravel-app/routes/web.php | 11 +++++++----` dan `1 file changed`.
+
 </div>
 
-Lihat perubahan dengan `git diff`.
+Fail ganti **menggantikan seluruh fail**. Jika anda sudah mengubah fail itu sendiri, simpan kerja anda dahulu dalam cawangan lain: `git switch -c kerja-sendiri && git commit -am "kerja sendiri" && git switch -`. Jika anda lebih suka tampalan, `aspnet-sast.patch` dan `laravel-sast.patch` dalam folder yang sama memberi hasil yang sama: `git apply --check <fail>.patch && git apply <fail>.patch`.
+
+**Langkah 2: baca apa yang berubah.** Jalankan `git diff` dan padankan setiap perubahan dengan temuan Semgrep yang anda lihat dalam Makmal 2.1:
+
+<div class="trk trk-a" markdown="1">
+
+| Endpoint | Sebelum | Selepas |
+|---|---|---|
+| `/search` | `LIKE '%" + q + "%'` (rentetan digabung) | `LIKE @q` dan `cmd.Parameters.AddWithValue("@q", ...)` |
+| `/login` | `username = '" + username + "'` digabung | `@u` dan `@p` sebagai parameter |
+| `/ping` | `/bin/sh -c "ping -c 1 " + host` | `ping` dipanggil terus (tiada shell), hujah sebagai senarai, dan hos disahkan dengan regex `^[A-Za-z0-9.\-]{1,253}$` (hos tidak sah memberi `400`) |
+| `/api/import` | `TypeNameHandling.All` (jenis ditentukan oleh input) | `DeserializeObject<Dictionary<string, object>>` (jenis tetap) |
+
+</div>
+
+<div class="trk trk-b" markdown="1">
+
+| Endpoint | Sebelum | Selepas |
+|---|---|---|
+| `/search` | `LIKE '%" . $q . "%'` (rentetan digabung) | `LIKE ?` dengan nilai `['%' . $q . '%']` |
+| `/login` | `name = '" . $username . "'` digabung | `name = ? AND password = ?` dengan `[$username, $hash]` |
+| `/ping` | `shell_exec('ping -c 1 ' . $host)` | hos disahkan dengan `preg_match` (tidak sah memberi `400`) dan `escapeshellarg($host)` |
+| `/api/import` | `unserialize($input)` (sebarang kelas) | `unserialize($input, ['allowed_classes' => false])` |
+
+</div>
+
+Tiga corak pembaikan yang sama berulang pada kebanyakan kelemahan injection:
+
+- **SQL:** gunakan **query berparameter**, jangan gabung rentetan.
+- **Command injection:** elak shell, hantar hujah sebagai senarai atau melalui `escapeshellarg`, dan sahkan input dengan **senarai putih** aksara.
+- **Deserialization:** jangan benarkan jenis atau kelas sewenang-wenangnya.
 
 ### Pengesahan 1: ujian fungsi
 
@@ -636,7 +666,7 @@ MD5 untuk kata laluan ialah kelemahan **sebenar**, jadi jangan tutup dengan `nos
 - [ ] Saya membandingkan set peraturan dan tahu kenapa bilangannya berbeza
 - [ ] Saya mengklasifikasikan setiap temuan (benar, positif palsu, bunyi)
 - [ ] Saya menyenaraikan kelemahan yang SAST terlepas dan tahu alat mana yang akan menangkapnya
-- [ ] Saya membaiki SQL/command injection dan mengesahkan dengan ujian fungsi **dan** imbasan semula
+- [ ] Saya menggantikan fail dengan pembaikan, memahami perubahannya, dan mengesahkan dengan ujian fungsi **dan** imbasan semula
 - [ ] Saya mengimbas kod yang dijana AI dan menerangkan kenapa saya bertanggungjawab ke atasnya
 - [ ] Saya boleh menjadikan Semgrep pintu dalam pipeline dengan `--error` dan menerima temuan dengan `nosemgrep` beralasan
 - [ ] Saya melihat job `sast` berjalan dalam GitLab CI, gagal pada temuan ERROR, dan (Trek A) lulus selepas triaj beralasan

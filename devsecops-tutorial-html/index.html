@@ -3465,7 +3465,7 @@ keywords = [&quot;value&quot;]
 <li>Faham apa SAST boleh dan tidak boleh lakukan, dan kenapa hasilnya bergantung pada <strong>set peraturan</strong>.</li>
 <li>Menjalankan <strong>Semgrep</strong> pada app anda, membandingkan set peraturan dan membuat <strong>triaj</strong> (benar atau positif palsu).</li>
 <li>Mengenal pasti kelemahan yang SAST <strong>terlepas</strong>, dan memadankannya dengan threat model anda.</li>
-<li>Membaiki SQL injection, command injection dan deserialization, kemudian mengesahkan pembaikan dengan ujian fungsi <strong>dan</strong> imbasan semula.</li>
+<li>Menerapkan dan memahami pembaikan untuk SQL injection, command injection dan deserialization, kemudian mengesahkannya dengan ujian fungsi <strong>dan</strong> imbasan semula.</li>
 <li>Mengimbas kod yang dijana AI dan mengaplikasikan <strong>quality gate</strong> serta pengurusan temuan.</li>
 <li>Menjalankan Semgrep sebagai pintu dalam <strong>GitLab CI</strong> dan membaca keputusannya.</li>
 </ol>
@@ -3938,24 +3938,94 @@ done
 <hr />
 <h2 id="m2-makmal-2-5-baiki-dan-sahkan"><a class="hl" href="#m2-makmal-2-5-baiki-dan-sahkan">Makmal 2.5: Baiki dan sahkan</a><label class="done-toggle"><input type="checkbox" data-k="m2-makmal-2-5-baiki-dan-sahkan" data-m="m2"><span>Selesai</span></label></h2>
 <p><strong>Tujuan.</strong> Membaiki kelemahan yang SAST nampak, dan <strong>mengesahkan</strong> pembaikan itu dengan dua cara.</p>
-<p>Cuba baiki sendiri dahulu (selama 15 minit): SQL injection pada <code>/search</code> dan <code>/login</code>, command injection pada <code>/ping</code>, dan deserialization pada <code>/api/import</code>. Panduan:</p>
-<ul>
-<li>SQL: gunakan <strong>query berparameter</strong>, jangan gabung rentetan.</li>
-<li>Command injection: elak shell; hantar hujah sebagai senarai; sahkan input dengan senarai putih aksara.</li>
-<li>Deserialization: jangan benarkan jenis sewenang-wenangnya.</li>
-</ul>
-<p>Kemudian bandingkan dengan tampalan rujukan. Jika anda sudah mengubah <code>Program.cs</code> (Trek A) atau <code>routes/web.php</code> (Trek B), simpan kerja anda dalam cawangan lain dahulu (<code>git switch -c kerja-sendiri &amp;&amp; git commit -am "kerja sendiri" &amp;&amp; git switch -</code>). Simpan fail tampalan dari bahagian <strong>Fail modul</strong> dalam folder repo, kemudian:</p>
+<p>Pembaikan sudah disediakan sebagai <strong>fail ganti</strong> supaya masa makmal digunakan untuk <strong>memahami dan mengesahkan</strong>, bukan menulis semula kod. Ia membaiki empat kelemahan: SQL injection pada <code>/search</code> dan <code>/login</code>, command injection pada <code>/ping</code>, dan deserialization pada <code>/api/import</code>.</p>
+<p><strong>Langkah 1: gantikan fail yang bermasalah.</strong> Fail ganti ada dalam repo tutorial (<code>~/um-devsecops</code>, juga di bahagian <strong>Fail modul</strong>). Dari folder <code>~/devsecops-lab</code>:</p>
 <div class="trk trk-a">
-<div class="code"><div class="code-bar"><span>terminal</span><button type="button" class="copy">Salin</button></div><pre><code class="language-bash">git apply --check aspnet-sast.patch &amp;&amp; git apply aspnet-sast.patch
+<div class="code"><div class="code-bar"><span>terminal</span><button type="button" class="copy">Salin</button></div><pre><code class="language-bash">cp ~/um-devsecops/devsecops-tutorial/modul-2-sast/aspnet-Program-baiki.cs aspnet-app/Program.cs
 git diff --stat
 </code></pre></div>
+<p>Anda mesti melihat <code>aspnet-app/Program.cs | 16 +++++++++++-----</code> dan <code>1 file changed</code>.</p>
 </div>
 <div class="trk trk-b">
-<div class="code"><div class="code-bar"><span>terminal</span><button type="button" class="copy">Salin</button></div><pre><code class="language-bash">git apply --check laravel-sast.patch &amp;&amp; git apply laravel-sast.patch
+<div class="code"><div class="code-bar"><span>terminal</span><button type="button" class="copy">Salin</button></div><pre><code class="language-bash">cp ~/um-devsecops/devsecops-tutorial/modul-2-sast/laravel-web-baiki.php laravel-app/routes/web.php
 git diff --stat
 </code></pre></div>
+<p>Anda mesti melihat <code>laravel-app/routes/web.php | 11 +++++++----</code> dan <code>1 file changed</code>.</p>
 </div>
-<p>Lihat perubahan dengan <code>git diff</code>.</p>
+<p>Fail ganti <strong>menggantikan seluruh fail</strong>. Jika anda sudah mengubah fail itu sendiri, simpan kerja anda dahulu dalam cawangan lain: <code>git switch -c kerja-sendiri &amp;&amp; git commit -am "kerja sendiri" &amp;&amp; git switch -</code>. Jika anda lebih suka tampalan, <code>aspnet-sast.patch</code> dan <code>laravel-sast.patch</code> dalam folder yang sama memberi hasil yang sama: <code>git apply --check &lt;fail&gt;.patch &amp;&amp; git apply &lt;fail&gt;.patch</code>.</p>
+<p><strong>Langkah 2: baca apa yang berubah.</strong> Jalankan <code>git diff</code> dan padankan setiap perubahan dengan temuan Semgrep yang anda lihat dalam Makmal 2.1:</p>
+<div class="trk trk-a">
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Sebelum</th>
+<th>Selepas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/search</code></td>
+<td><code>LIKE '%" + q + "%'</code> (rentetan digabung)</td>
+<td><code>LIKE @q</code> dan <code>cmd.Parameters.AddWithValue("@q", ...)</code></td>
+</tr>
+<tr>
+<td><code>/login</code></td>
+<td><code>username = '" + username + "'</code> digabung</td>
+<td><code>@u</code> dan <code>@p</code> sebagai parameter</td>
+</tr>
+<tr>
+<td><code>/ping</code></td>
+<td><code>/bin/sh -c "ping -c 1 " + host</code></td>
+<td><code>ping</code> dipanggil terus (tiada shell), hujah sebagai senarai, dan hos disahkan dengan regex <code>^[A-Za-z0-9.\-]{1,253}$</code> (hos tidak sah memberi <code>400</code>)</td>
+</tr>
+<tr>
+<td><code>/api/import</code></td>
+<td><code>TypeNameHandling.All</code> (jenis ditentukan oleh input)</td>
+<td><code>DeserializeObject&lt;Dictionary&lt;string, object&gt;&gt;</code> (jenis tetap)</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="trk trk-b">
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Sebelum</th>
+<th>Selepas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/search</code></td>
+<td><code>LIKE '%" . $q . "%'</code> (rentetan digabung)</td>
+<td><code>LIKE ?</code> dengan nilai <code>['%' . $q . '%']</code></td>
+</tr>
+<tr>
+<td><code>/login</code></td>
+<td><code>name = '" . $username . "'</code> digabung</td>
+<td><code>name = ? AND password = ?</code> dengan <code>[$username, $hash]</code></td>
+</tr>
+<tr>
+<td><code>/ping</code></td>
+<td><code>shell_exec('ping -c 1 ' . $host)</code></td>
+<td>hos disahkan dengan <code>preg_match</code> (tidak sah memberi <code>400</code>) dan <code>escapeshellarg($host)</code></td>
+</tr>
+<tr>
+<td><code>/api/import</code></td>
+<td><code>unserialize($input)</code> (sebarang kelas)</td>
+<td><code>unserialize($input, ['allowed_classes' =&gt; false])</code></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p>Tiga corak pembaikan yang sama berulang pada kebanyakan kelemahan injection:</p>
+<ul>
+<li><strong>SQL:</strong> gunakan <strong>query berparameter</strong>, jangan gabung rentetan.</li>
+<li><strong>Command injection:</strong> elak shell, hantar hujah sebagai senarai atau melalui <code>escapeshellarg</code>, dan sahkan input dengan <strong>senarai putih</strong> aksara.</li>
+<li><strong>Deserialization:</strong> jangan benarkan jenis atau kelas sewenang-wenangnya.</li>
+</ul>
 <h3 id="m2-pengesahan-1-ujian-fungsi"><a class="hl" href="#m2-pengesahan-1-ujian-fungsi">Pengesahan 1: ujian fungsi</a></h3>
 <p>Bina semula dan jalankan app, kemudian cuba serangan Modul 0 sekali lagi.</p>
 <div class="trk trk-a">
@@ -4151,7 +4221,7 @@ git push gitlab main
 <li class="task"><label><input type="checkbox" data-k="m2-semak-2" data-m="m2"><span>Saya membandingkan set peraturan dan tahu kenapa bilangannya berbeza</span></label></li>
 <li class="task"><label><input type="checkbox" data-k="m2-semak-3" data-m="m2"><span>Saya mengklasifikasikan setiap temuan (benar, positif palsu, bunyi)</span></label></li>
 <li class="task"><label><input type="checkbox" data-k="m2-semak-4" data-m="m2"><span>Saya menyenaraikan kelemahan yang SAST terlepas dan tahu alat mana yang akan menangkapnya</span></label></li>
-<li class="task"><label><input type="checkbox" data-k="m2-semak-5" data-m="m2"><span>Saya membaiki SQL/command injection dan mengesahkan dengan ujian fungsi <strong>dan</strong> imbasan semula</span></label></li>
+<li class="task"><label><input type="checkbox" data-k="m2-semak-5" data-m="m2"><span>Saya menggantikan fail dengan pembaikan, memahami perubahannya, dan mengesahkan dengan ujian fungsi <strong>dan</strong> imbasan semula</span></label></li>
 <li class="task"><label><input type="checkbox" data-k="m2-semak-6" data-m="m2"><span>Saya mengimbas kod yang dijana AI dan menerangkan kenapa saya bertanggungjawab ke atasnya</span></label></li>
 <li class="task"><label><input type="checkbox" data-k="m2-semak-7" data-m="m2"><span>Saya boleh menjadikan Semgrep pintu dalam pipeline dengan <code>--error</code> dan menerima temuan dengan <code>nosemgrep</code> beralasan</span></label></li>
 <li class="task"><label><input type="checkbox" data-k="m2-semak-8" data-m="m2"><span>Saya melihat job <code>sast</code> berjalan dalam GitLab CI, gagal pada temuan ERROR, dan (Trek A) lulus selepas triaj beralasan</span></label></li>
@@ -4162,6 +4232,251 @@ git push gitlab main
 <li>OWASP Cheat Sheet: SQL Injection Prevention: <a href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html" target="_blank" rel="noopener">https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html</a></li>
 <li>OWASP Cheat Sheet: OS Command Injection Defense: <a href="https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html" target="_blank" rel="noopener">https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html</a></li>
 </ul><section class="files" id="m2-fail"><h2><a class="hl" href="#m2-fail">Fail modul</a></h2><p class="wnote">Semua fail dan skrip untuk modul ini. Klik untuk buka, kemudian salin.</p>
+<details class="file" id="f-modul-2-sast-aspnet-program-baiki-cs"><summary><span class="fname">aspnet-Program-baiki.cs</span><span class="fsize">9.4 KB</span></summary><div class="code"><div class="code-bar"><span>csharp</span><button type="button" class="copy">Salin</button></div><pre><code class="language-csharp">// Kedai Bengkel (ASP.NET Core): app SENGAJA tidak selamat untuk latihan DevSecOps.
+// Jangan deploy di mana-mana selain persekitaran lab anda sendiri.
+using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.Data.Sqlite;
+using Newtonsoft.Json;
+
+const string ConnectionString = &quot;Data Source=app.db&quot;;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddOpenApi();
+builder.Services.AddCors(o =&gt; o.AddDefaultPolicy(p =&gt; p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+
+var app = builder.Build();
+
+app.UseDeveloperExceptionPage();
+app.UseCors();
+app.MapOpenApi();
+
+Db.Init(ConnectionString);
+
+static IResult Html(string body) =&gt;
+    Results.Content(
+        &quot;&lt;!doctype html&gt;&lt;html lang=&#x27;ms&#x27;&gt;&lt;head&gt;&lt;meta charset=&#x27;utf-8&#x27;&gt;&lt;title&gt;Kedai Bengkel&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&quot; +
+        &quot;&lt;nav&gt;&lt;a href=&#x27;/&#x27;&gt;Utama&lt;/a&gt; | &lt;a href=&#x27;/search?q=&#x27;&gt;Cari&lt;/a&gt; | &lt;a href=&#x27;/guestbook&#x27;&gt;Buku pelawat&lt;/a&gt; | &lt;a href=&#x27;/login&#x27;&gt;Log masuk&lt;/a&gt;&lt;/nav&gt;&lt;hr&gt;&quot; +
+        body + &quot;&lt;/body&gt;&lt;/html&gt;&quot;,
+        &quot;text/html; charset=utf-8&quot;);
+
+app.MapGet(&quot;/&quot;, () =&gt; Html(
+    &quot;&lt;h1&gt;Kedai Bengkel&lt;/h1&gt;&lt;ul&gt;&quot; +
+    &quot;&lt;li&gt;&lt;a href=&#x27;/search?q=laptop&#x27;&gt;Cari produk&lt;/a&gt;&lt;/li&gt;&quot; +
+    &quot;&lt;li&gt;&lt;a href=&#x27;/guestbook&#x27;&gt;Buku pelawat&lt;/a&gt;&lt;/li&gt;&quot; +
+    &quot;&lt;li&gt;&lt;a href=&#x27;/ping?host=127.0.0.1&#x27;&gt;Alat ping&lt;/a&gt;&lt;/li&gt;&quot; +
+    &quot;&lt;li&gt;&lt;a href=&#x27;/download?file=notis.txt&#x27;&gt;Muat turun notis&lt;/a&gt;&lt;/li&gt;&quot; +
+    &quot;&lt;li&gt;&lt;a href=&#x27;/login&#x27;&gt;Log masuk&lt;/a&gt;&lt;/li&gt;&quot; +
+    &quot;&lt;li&gt;&lt;a href=&#x27;/admin&#x27;&gt;Admin&lt;/a&gt;&lt;/li&gt;&quot; +
+    &quot;&lt;li&gt;&lt;a href=&#x27;/openapi/v1.json&#x27;&gt;Dokumen OpenAPI&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&quot;));
+
+// SQL injection + reflected XSS
+app.MapGet(&quot;/search&quot;, (string? q) =&gt;
+{
+    q ??= &quot;&quot;;
+    var sql = &quot;SELECT id, name, price FROM products WHERE name LIKE @q&quot;;
+    var rows = new StringBuilder();
+    using var conn = new SqliteConnection(ConnectionString);
+    conn.Open();
+    try
+    {
+        using var cmd = new SqliteCommand(sql, conn);
+        cmd.Parameters.AddWithValue(&quot;@q&quot;, &quot;%&quot; + q + &quot;%&quot;);
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+            rows.Append($&quot;&lt;tr&gt;&lt;td&gt;{r.GetInt64(0)}&lt;/td&gt;&lt;td&gt;{r.GetString(1)}&lt;/td&gt;&lt;td&gt;{r.GetDouble(2):F2}&lt;/td&gt;&lt;/tr&gt;&quot;);
+    }
+    catch (Exception ex)
+    {
+        rows.Append(&quot;&lt;tr&gt;&lt;td colspan=&#x27;3&#x27;&gt;Ralat: &quot; + ex.Message + &quot;&lt;/td&gt;&lt;/tr&gt;&quot;);
+    }
+    return Html($&quot;&lt;h1&gt;Hasil carian untuk: {q}&lt;/h1&gt;&lt;table border=&#x27;1&#x27;&gt;&lt;tr&gt;&lt;th&gt;ID&lt;/th&gt;&lt;th&gt;Nama&lt;/th&gt;&lt;th&gt;Harga (RM)&lt;/th&gt;&lt;/tr&gt;{rows}&lt;/table&gt;&quot;);
+});
+
+// Stored XSS + tiada perlindungan CSRF
+app.MapGet(&quot;/guestbook&quot;, () =&gt;
+{
+    var items = new StringBuilder();
+    using var conn = new SqliteConnection(ConnectionString);
+    conn.Open();
+    using var cmd = new SqliteCommand(&quot;SELECT name, message FROM guestbook ORDER BY id DESC&quot;, conn);
+    using var r = cmd.ExecuteReader();
+    while (r.Read())
+        items.Append($&quot;&lt;li&gt;&lt;b&gt;{r.GetString(0)}&lt;/b&gt;: {r.GetString(1)}&lt;/li&gt;&quot;);
+    return Html(
+        &quot;&lt;h1&gt;Buku pelawat&lt;/h1&gt;&quot; +
+        &quot;&lt;form method=&#x27;post&#x27; action=&#x27;/guestbook&#x27;&gt;&quot; +
+        &quot;&lt;input name=&#x27;name&#x27; placeholder=&#x27;Nama&#x27;&gt; &lt;input name=&#x27;message&#x27; placeholder=&#x27;Mesej&#x27;&gt; &lt;button&gt;Hantar&lt;/button&gt;&lt;/form&gt;&quot; +
+        $&quot;&lt;ul&gt;{items}&lt;/ul&gt;&quot;);
+});
+
+app.MapPost(&quot;/guestbook&quot;, async (HttpRequest req) =&gt;
+{
+    var form = await req.ReadFormAsync();
+    using var conn = new SqliteConnection(ConnectionString);
+    conn.Open();
+    using var cmd = new SqliteCommand(&quot;INSERT INTO guestbook (name, message) VALUES ($n, $m)&quot;, conn);
+    cmd.Parameters.AddWithValue(&quot;$n&quot;, form[&quot;name&quot;].ToString());
+    cmd.Parameters.AddWithValue(&quot;$m&quot;, form[&quot;message&quot;].ToString());
+    cmd.ExecuteNonQuery();
+    return Results.Redirect(&quot;/guestbook&quot;);
+});
+
+// Command injection
+app.MapGet(&quot;/ping&quot;, (string? host) =&gt;
+{
+    host ??= &quot;127.0.0.1&quot;;
+    if (!System.Text.RegularExpressions.Regex.IsMatch(host, @&quot;^[A-Za-z0-9.\-]{1,253}$&quot;))
+        return Results.BadRequest(&quot;Nama hos tidak sah&quot;);
+    var psi = new ProcessStartInfo(&quot;ping&quot;)
+    {
+        RedirectStandardOutput = true,
+        RedirectStandardError = true
+    };
+    psi.ArgumentList.Add(&quot;-c&quot;);
+    psi.ArgumentList.Add(&quot;1&quot;);
+    psi.ArgumentList.Add(host);
+    using var p = Process.Start(psi)!;
+    var output = p.StandardOutput.ReadToEnd() + p.StandardError.ReadToEnd();
+    p.WaitForExit();
+    return Html($&quot;&lt;h1&gt;Ping {host}&lt;/h1&gt;&lt;pre&gt;{output}&lt;/pre&gt;&quot;);
+});
+
+// Path traversal
+app.MapGet(&quot;/download&quot;, (string file) =&gt;
+{
+    var path = Path.Combine(&quot;files&quot;, file);
+    return File.Exists(path) ? Results.Text(File.ReadAllText(path)) : Results.NotFound(&quot;Fail tidak ditemui&quot;);
+});
+
+// Open redirect
+app.MapGet(&quot;/redirect&quot;, (string url) =&gt; Results.Redirect(url));
+
+app.MapGet(&quot;/login&quot;, () =&gt; Html(
+    &quot;&lt;h1&gt;Log masuk&lt;/h1&gt;&lt;form method=&#x27;post&#x27; action=&#x27;/login&#x27;&gt;&quot; +
+    &quot;&lt;input name=&#x27;username&#x27; placeholder=&#x27;Nama pengguna&#x27;&gt; &lt;input name=&#x27;password&#x27; type=&#x27;password&#x27; placeholder=&#x27;Kata laluan&#x27;&gt; &lt;button&gt;Masuk&lt;/button&gt;&lt;/form&gt;&quot;));
+
+// SQL injection pada log masuk + hash MD5 + cookie sesi yang lemah
+app.MapPost(&quot;/login&quot;, async (HttpRequest req, HttpResponse res) =&gt;
+{
+    var form = await req.ReadFormAsync();
+    var username = form[&quot;username&quot;].ToString();
+    var password = form[&quot;password&quot;].ToString();
+    var sql = &quot;SELECT username, role FROM users WHERE username = @u AND password_hash = @p&quot;;
+    using var conn = new SqliteConnection(ConnectionString);
+    conn.Open();
+    using var cmd = new SqliteCommand(sql, conn);
+    cmd.Parameters.AddWithValue(&quot;@u&quot;, username);
+    cmd.Parameters.AddWithValue(&quot;@p&quot;, Db.Md5(password));
+    using var r = cmd.ExecuteReader();
+    if (r.Read())
+    {
+        var name = r.GetString(0);
+        var role = r.GetString(1);
+        res.Cookies.Append(&quot;session&quot;, Convert.ToBase64String(Encoding.UTF8.GetBytes(name + &quot;:&quot; + role)));
+        return Html($&quot;&lt;h1&gt;Selamat datang, {name}&lt;/h1&gt;&lt;p&gt;Peranan: {role}&lt;/p&gt;&quot;);
+    }
+    return Html(&quot;&lt;h1&gt;Log masuk gagal&lt;/h1&gt;&lt;p&gt;Nama pengguna atau kata laluan salah.&lt;/p&gt;&quot;);
+});
+
+// Pengesahan rosak: peranan dipercayai daripada cookie yang boleh dipalsukan klien
+app.MapGet(&quot;/admin&quot;, (HttpRequest req) =&gt;
+{
+    var cookie = req.Cookies[&quot;session&quot;];
+    var role = &quot;&quot;;
+    try
+    {
+        if (cookie is not null)
+            role = Encoding.UTF8.GetString(Convert.FromBase64String(cookie)).Split(&#x27;:&#x27;).Last();
+    }
+    catch (FormatException) { }
+    if (role != &quot;admin&quot;)
+        return Html(&quot;&lt;h1&gt;Akses ditolak&lt;/h1&gt;&quot;);
+
+    var items = new StringBuilder();
+    using var conn = new SqliteConnection(ConnectionString);
+    conn.Open();
+    using var cmd = new SqliteCommand(&quot;SELECT username, email, password_hash FROM users&quot;, conn);
+    using var r = cmd.ExecuteReader();
+    while (r.Read())
+        items.Append($&quot;&lt;tr&gt;&lt;td&gt;{r.GetString(0)}&lt;/td&gt;&lt;td&gt;{r.GetString(1)}&lt;/td&gt;&lt;td&gt;{r.GetString(2)}&lt;/td&gt;&lt;/tr&gt;&quot;);
+    return Html($&quot;&lt;h1&gt;Panel admin&lt;/h1&gt;&lt;table border=&#x27;1&#x27;&gt;{items}&lt;/table&gt;&quot;);
+});
+
+// IDOR: tiada pengesahan dan hash kata laluan didedahkan
+app.MapGet(&quot;/api/users/{id:int}&quot;, (int id) =&gt;
+{
+    using var conn = new SqliteConnection(ConnectionString);
+    conn.Open();
+    using var cmd = new SqliteCommand(&quot;SELECT id, username, email, role, password_hash FROM users WHERE id = $id&quot;, conn);
+    cmd.Parameters.AddWithValue(&quot;$id&quot;, id);
+    using var r = cmd.ExecuteReader();
+    if (!r.Read())
+        return Results.NotFound();
+    return Results.Json(new
+    {
+        id = r.GetInt64(0),
+        username = r.GetString(1),
+        email = r.GetString(2),
+        role = r.GetString(3),
+        passwordHash = r.GetString(4)
+    });
+});
+
+app.MapGet(&quot;/api/products/{id:int}&quot;, (int id) =&gt;
+{
+    using var conn = new SqliteConnection(ConnectionString);
+    conn.Open();
+    using var cmd = new SqliteCommand(&quot;SELECT id, name, price FROM products WHERE id = $id&quot;, conn);
+    cmd.Parameters.AddWithValue(&quot;$id&quot;, id);
+    using var r = cmd.ExecuteReader();
+    return r.Read()
+        ? Results.Json(new { id = r.GetInt64(0), name = r.GetString(1), price = r.GetDouble(2) })
+        : Results.NotFound();
+});
+
+// Deserialization tidak selamat
+app.MapPost(&quot;/api/import&quot;, async (HttpRequest req) =&gt;
+{
+    using var reader = new StreamReader(req.Body);
+    var body = await reader.ReadToEndAsync();
+    var obj = JsonConvert.DeserializeObject&lt;Dictionary&lt;string, object&gt;&gt;(body);
+    return Results.Ok(new { received = obj?.GetType().Name });
+});
+
+app.Run();
+
+static class Db
+{
+    public static void Init(string connectionString)
+    {
+        using var conn = new SqliteConnection(connectionString);
+        conn.Open();
+        Exec(conn, &quot;CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name TEXT, price REAL)&quot;);
+        Exec(conn, &quot;CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, email TEXT, role TEXT, password_hash TEXT)&quot;);
+        Exec(conn, &quot;CREATE TABLE IF NOT EXISTS guestbook (id INTEGER PRIMARY KEY, name TEXT, message TEXT)&quot;);
+
+        using var check = new SqliteCommand(&quot;SELECT COUNT(*) FROM products&quot;, conn);
+        if ((long)check.ExecuteScalar()! &gt; 0)
+            return;
+
+        Exec(conn, &quot;INSERT INTO products (name, price) VALUES (&#x27;Laptop Bengkel 14 inci&#x27;, 2499.00), (&#x27;Tetikus tanpa wayar&#x27;, 59.90), (&#x27;Papan kekunci mekanikal&#x27;, 199.00)&quot;);
+        Exec(conn, $&quot;INSERT INTO users (username, email, role, password_hash) VALUES (&#x27;admin&#x27;, &#x27;admin@kedai.test&#x27;, &#x27;admin&#x27;, &#x27;{Md5(&quot;admin123&quot;)}&#x27;), (&#x27;alice&#x27;, &#x27;alice@kedai.test&#x27;, &#x27;user&#x27;, &#x27;{Md5(&quot;kata-laluan-alice&quot;)}&#x27;)&quot;);
+        Exec(conn, &quot;INSERT INTO guestbook (name, message) VALUES (&#x27;Aisyah&#x27;, &#x27;Kedai yang bagus!&#x27;)&quot;);
+    }
+
+    static void Exec(SqliteConnection conn, string sql)
+    {
+        using var cmd = new SqliteCommand(sql, conn);
+        cmd.ExecuteNonQuery();
+    }
+
+    // MD5 untuk kata laluan: sengaja lemah
+    public static string Md5(string s) =&gt;
+        Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(s))).ToLowerInvariant();
+}
+</code></pre></div></details>
 <details class="file" id="f-modul-2-sast-aspnet-sast-patch"><summary><span class="fname">aspnet-sast.patch</span><span class="fsize">2.8 KB</span></summary><div class="code"><div class="code-bar"><span>teks</span><button type="button" class="copy">Salin</button></div><pre><code class="nohighlight">diff --git a/aspnet-app/Program.cs b/aspnet-app/Program.cs
 index a49a64f..9602e90 100644
 --- a/aspnet-app/Program.cs
@@ -4333,6 +4648,103 @@ index f337cb3..ed08d4a 100644
 +    $obj = unserialize($request-&gt;input(&#x27;data&#x27;), [&#x27;allowed_classes&#x27; =&gt; false]);
      return response()-&gt;json([&#x27;received&#x27; =&gt; is_object($obj) ? get_class($obj) : gettype($obj)]);
  });
+</code></pre></div></details>
+<details class="file" id="f-modul-2-sast-laravel-web-baiki-php"><summary><span class="fname">laravel-web-baiki.php</span><span class="fsize">3.6 KB</span></summary><div class="code"><div class="code-bar"><span>php</span><button type="button" class="copy">Salin</button></div><pre><code class="language-php">&lt;?php
+
+// Kedai Bengkel (Laravel): app SENGAJA tidak selamat untuk latihan DevSecOps.
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
+
+Route::get(&#x27;/&#x27;, fn () =&gt; view(&#x27;home&#x27;));
+
+// SQL injection + reflected XSS
+Route::get(&#x27;/search&#x27;, function (Request $request) {
+    $q = $request-&gt;query(&#x27;q&#x27;, &#x27;&#x27;);
+    $error = null;
+    $rows = [];
+    try {
+        $rows = DB::select(&quot;SELECT id, name, price FROM products WHERE name LIKE ?&quot;, [&#x27;%&#x27; . $q . &#x27;%&#x27;]);
+    } catch (\Throwable $e) {
+        $error = $e-&gt;getMessage();
+    }
+    return view(&#x27;search&#x27;, [&#x27;q&#x27; =&gt; $q, &#x27;rows&#x27; =&gt; $rows, &#x27;error&#x27; =&gt; $error]);
+});
+
+// Stored XSS + CSRF dimatikan
+Route::get(&#x27;/guestbook&#x27;, fn () =&gt; view(&#x27;guestbook&#x27;, [&#x27;items&#x27; =&gt; DB::table(&#x27;guestbook&#x27;)-&gt;orderByDesc(&#x27;id&#x27;)-&gt;get()]));
+Route::post(&#x27;/guestbook&#x27;, function (Request $request) {
+    DB::table(&#x27;guestbook&#x27;)-&gt;insert([
+        &#x27;name&#x27; =&gt; $request-&gt;input(&#x27;name&#x27;),
+        &#x27;message&#x27; =&gt; $request-&gt;input(&#x27;message&#x27;),
+    ]);
+    return redirect(&#x27;/guestbook&#x27;);
+});
+
+// Command injection
+Route::get(&#x27;/ping&#x27;, function (Request $request) {
+    $host = $request-&gt;query(&#x27;host&#x27;, &#x27;127.0.0.1&#x27;);
+    if (! preg_match(&#x27;/^[A-Za-z0-9.\-]{1,253}$/&#x27;, $host)) {
+        abort(400, &#x27;Nama hos tidak sah&#x27;);
+    }
+    $output = shell_exec(&#x27;ping -c 1 &#x27; . escapeshellarg($host) . &#x27; 2&gt;&amp;1&#x27;);
+    return view(&#x27;ping&#x27;, [&#x27;host&#x27; =&gt; $host, &#x27;output&#x27; =&gt; $output]);
+});
+
+// Path traversal
+Route::get(&#x27;/download&#x27;, function (Request $request) {
+    $path = base_path(&#x27;files/&#x27; . $request-&gt;query(&#x27;file&#x27;));
+    return file_exists($path)
+        ? response(file_get_contents($path), 200, [&#x27;Content-Type&#x27; =&gt; &#x27;text/plain&#x27;])
+        : response(&#x27;Fail tidak ditemui&#x27;, 404);
+});
+
+// Open redirect
+Route::get(&#x27;/redirect&#x27;, fn (Request $request) =&gt; redirect($request-&gt;query(&#x27;url&#x27;)));
+
+Route::get(&#x27;/login&#x27;, fn () =&gt; view(&#x27;login&#x27;));
+
+// SQL injection pada log masuk + MD5 + cookie sesi lemah (tanpa HttpOnly/Secure)
+Route::post(&#x27;/login&#x27;, function (Request $request) {
+    $username = $request-&gt;input(&#x27;username&#x27;);
+    $hash = md5((string) $request-&gt;input(&#x27;password&#x27;));
+    $rows = DB::select(&quot;SELECT name, role FROM users WHERE name = ? AND password = ?&quot;, [$username, $hash]);
+    if (count($rows) === 0) {
+        return response(&#x27;&lt;h1&gt;Log masuk gagal&lt;/h1&gt;&#x27;, 200);
+    }
+    $value = base64_encode($rows[0]-&gt;name . &#x27;:&#x27; . $rows[0]-&gt;role);
+    return response(&#x27;&lt;h1&gt;Selamat datang, &#x27; . $rows[0]-&gt;name . &#x27;&lt;/h1&gt;&#x27;)
+        -&gt;withCookie(cookie(&#x27;session&#x27;, $value, 60, &#x27;/&#x27;, null, false, false, true));
+});
+
+// Pengesahan rosak: peranan dipercayai daripada cookie yang boleh dipalsukan klien
+Route::get(&#x27;/admin&#x27;, function () {
+    $decoded = base64_decode($_COOKIE[&#x27;session&#x27;] ?? &#x27;&#x27;, true) ?: &#x27;&#x27;;
+    $parts = explode(&#x27;:&#x27;, $decoded);
+    if (end($parts) !== &#x27;admin&#x27;) {
+        return response(&#x27;&lt;h1&gt;Akses ditolak&lt;/h1&gt;&#x27;, 403);
+    }
+    return view(&#x27;admin&#x27;, [&#x27;users&#x27; =&gt; DB::table(&#x27;users&#x27;)-&gt;get()]);
+});
+
+// IDOR: tiada pengesahan dan hash kata laluan didedahkan ($hidden dikosongkan)
+Route::get(&#x27;/api/users/{id}&#x27;, fn ($id) =&gt; User::findOrFail($id));
+Route::get(&#x27;/api/products/{id}&#x27;, fn ($id) =&gt; DB::table(&#x27;products&#x27;)-&gt;where(&#x27;id&#x27;, $id)-&gt;first());
+
+// Mass assignment: pengguna boleh menetapkan `role` sendiri
+Route::post(&#x27;/api/profile/{id}&#x27;, function (Request $request, $id) {
+    $user = User::findOrFail($id);
+    $user-&gt;update($request-&gt;all());
+    return $user;
+});
+
+// Deserialization tidak selamat
+Route::post(&#x27;/api/import&#x27;, function (Request $request) {
+    $obj = unserialize($request-&gt;input(&#x27;data&#x27;), [&#x27;allowed_classes&#x27; =&gt; false]);
+    return response()-&gt;json([&#x27;received&#x27; =&gt; is_object($obj) ? get_class($obj) : gettype($obj)]);
+});
 </code></pre></div></details>
 </section></section>
 <section class="module" id="m3" data-m="m3"><header class="mod-head"><p class="eyebrow">Hari 2 · 2:00 – 5:00 petang</p><h1>Modul 3: SCA, SBOM dan pakej yang direka AI</h1><div class="mod-prog" data-m="m3"><span class="bar"><i></i></span><span class="lbl"></span></div></header>
