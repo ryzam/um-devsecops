@@ -1,6 +1,6 @@
 # Bengkel DevSecOps Empat Hari
 
-Bengkel ini mengajar cara membina keselamatan ke dalam proses membina dan menghantar perisian, menggunakan dua app sebenar yang **sengaja tidak selamat**. Anda akan mencari, memahami dan membaiki kelemahan menggunakan lima jenis imbasan, kemudian menyatukan semuanya dalam pipeline.
+Bengkel ini mengajar cara membina keselamatan ke dalam proses membina dan menghantar perisian, menggunakan dua app sebenar yang **sengaja tidak selamat**. Anda akan mencari, memahami dan membaiki vulnerability menggunakan lima jenis imbasan, kemudian menyatukan semuanya dalam pipeline.
 
 Jurulatih: Irwan Azam Ahmad
 
@@ -35,7 +35,7 @@ Anda mengikut **satu** trek. Pilih di menu kiri (**Trek anda**). Kandungan trek 
 | A | `aspnet-app/` | ASP.NET Core (.NET 10), SQLite |
 | B | `laravel-app/` | PHP Laravel 13, SQLite |
 
-Kedua-dua app ialah "Kedai Bengkel" dengan fungsi yang sama dan kelemahan yang hampir sama. Latihan IaC (`k8s/`, `terraform/`) dikongsi.
+Kedua-dua app ialah "Kedai Bengkel" dengan fungsi yang sama dan vulnerability yang hampir sama. Latihan IaC (`k8s/`, `terraform/`) dikongsi.
 
 ## Cara guna panduan ini
 
@@ -44,7 +44,7 @@ Kedua-dua app ialah "Kedai Bengkel" dengan fungsi yang sama dan kelemahan yang h
 - Bahagian **Jawapan** dilipat. Cuba dahulu sebelum membukanya.
 - Fail yang dirujuk (skrip, polisi, tampalan) ada di bahagian **Fail modul** pada hujung setiap modul.
 
-> **Amaran keselamatan.** Kedua-dua app mengandungi kelemahan sebenar. Jalankan hanya pada laptop anda dan jangan deploy ke internet. Semua kata laluan, kunci dan token dalam repo adalah **palsu** dan dijana untuk latihan. Jangan guna alat imbasan pada sistem yang bukan milik anda tanpa kebenaran bertulis.
+> **Amaran keselamatan.** Kedua-dua app mengandungi vulnerability sebenar. Jalankan hanya pada laptop anda dan jangan deploy ke internet. Semua kata laluan, kunci dan token dalam repo adalah **palsu** dan dijana untuk latihan. Jangan guna alat imbasan pada sistem yang bukan milik anda tanpa kebenaran bertulis.
 
 ## Peraturan makmal
 

@@ -362,7 +362,7 @@ using var cmd = new SqliteCommand(sql, conn);
 
 <div class="trk trk-b" markdown="1">
 
-**Semgrep** menanda MD5 (`weak-crypto`, tiga lokasi) dan `exec-use` (`shell_exec`). MD5 untuk kata laluan ialah kelemahan **sebenar**: jangan tutup dengan `nosemgrep`. Terapkan tampalan bcrypt yang disediakan (`laravel-hash.patch`, **Fail modul**), ia menggantikan MD5 dengan `password_hash`/`password_verify` dalam seeder dan log masuk:
+**Semgrep** menanda MD5 (`weak-crypto`, tiga lokasi) dan `exec-use` (`shell_exec`). MD5 untuk kata laluan ialah vulnerability **sebenar**: jangan tutup dengan `nosemgrep`. Terapkan tampalan bcrypt yang disediakan (`laravel-hash.patch`, **Fail modul**), ia menggantikan MD5 dengan `password_hash`/`password_verify` dalam seeder dan log masuk:
 
 ```bash
 git apply --check laravel-hash.patch && git apply laravel-hash.patch
@@ -379,7 +379,7 @@ $output = shell_exec('ping -c 1 ' . escapeshellarg($host) . ' 2>&1');
 
 **Trivy** boleh gagal kerana pengecualian (`.trivyignore`) belum dalam repo, atau manifest `k8s/` masih asal: pembaikannya ada dalam Modul 7. Pipeline akan lulus sepenuhnya selepas Modul 7.
 
-> **Harbor dan Trivy CLI boleh berbeza pendapat.** Pintu `imej` kita gagal pada **Critical** (Trivy CLI), manakala polisi Harbor menyekat capaian pada **High** (pengimbas Trivy dalam Harbor, versi dan pangkalan data kerentanannya sendiri). Imej yang bersih mengikut CLI boleh disekat oleh Harbor dengan HTTP 412 pada langkah tandatangan. Itu bukan pepijat pipeline: dua alat, dua pangkalan data. Baiki kerentanan yang Harbor tunjuk, atau (untuk kerentanan tanpa pembaikan) gunakan allowlist projek dengan tarikh tamat.
+> **Harbor dan Trivy CLI boleh berbeza pendapat.** Pintu `imej` kita gagal pada **Critical** (Trivy CLI), manakala polisi Harbor menyekat capaian pada **High** (pengimbas Trivy dalam Harbor, versi dan pangkalan data vulnerabilitynya sendiri). Imej yang bersih mengikut CLI boleh disekat oleh Harbor dengan HTTP 412 pada langkah tandatangan. Itu bukan pepijat pipeline: dua alat, dua pangkalan data. Baiki vulnerability yang Harbor tunjuk, atau (untuk vulnerability tanpa pembaikan) gunakan allowlist projek dengan tarikh tamat.
 
 ---
 

@@ -4,9 +4,9 @@
 
 Dalam modul ini anda akan:
 
-1. Faham SCA (Software Composition Analysis): pakej langsung dan **transitif**, fail kunci (lock file), dan pangkalan data kerentanan.
+1. Faham SCA (Software Composition Analysis): pakej langsung dan **transitif**, fail kunci (lock file), dan pangkalan data vulnerability.
 2. Menjalankan alat asal ekosistem (`dotnet list package`, `composer audit`) dan **Trivy**, dan membandingkan hasilnya.
-3. Membaiki kerentanan dengan menaikkan versi, dan memutuskan apa yang dilakukan bila **tiada versi yang dibaiki**.
+3. Membaiki vulnerability dengan menaikkan versi, dan memutuskan apa yang dilakukan bila **tiada versi yang dibaiki**.
 4. Menjana **SBOM** (CycloneDX) dengan Trivy dan Syft, dan mengimbas SBOM itu.
 5. Menyemak pakej yang **dicadangkan AI** sebelum menambahnya, kerana pakej itu mungkin tidak wujud.
 
@@ -29,7 +29,7 @@ Dalam modul ini anda akan:
 
 ### Apa itu SCA
 
-Kebanyakan kod dalam app anda bukan anda yang tulis. **SCA** membaca senarai pakej yang anda guna dan memadankannya dengan pangkalan data kerentanan yang diketahui (CVE, GitHub Advisory dan lain-lain). Ia menjawab: *"pakej versi ini ada masalah yang diketahui?"*
+Kebanyakan kod dalam app anda bukan anda yang tulis. **SCA** membaca senarai pakej yang anda guna dan memadankannya dengan pangkalan data vulnerability yang diketahui (CVE, GitHub Advisory dan lain-lain). Ia menjawab: *"pakej versi ini ada masalah yang diketahui?"*
 
 - **Langsung (direct)**: pakej yang anda tambah sendiri dalam `.csproj` atau `composer.json`.
 - **Transitif**: pakej yang dibawa oleh pakej lain. Anda tidak memilihnya tetapi anda tetap menjalankannya.
@@ -37,15 +37,15 @@ Kebanyakan kod dalam app anda bukan anda yang tulis. **SCA** membaca senarai pak
 
 ### Apa SCA tidak boleh lakukan
 
-- Ia memberitahu pakej **ada** kerentanan, bukan sama ada kod anda **menggunakan** bahagian yang rentan.
-- Kerentanan yang baru ditemui tidak akan ada hingga pangkalan data dikemas kini. Imbas **berkala**, bukan sekali.
+- Ia memberitahu pakej **ada** vulnerability, bukan sama ada kod anda **menggunakan** bahagian yang vulnerable.
+- Vulnerability yang baru ditemui tidak akan ada hingga pangkalan data dikemas kini. Imbas **berkala**, bukan sekali.
 - Keterukan (High) ialah skor umum, bukan kesan sebenar pada app anda. Konteks anda menentukan keutamaan.
 
 ### SBOM
 
-**SBOM** (Software Bill of Materials) ialah senarai komponen dalam perisian anda, seperti senarai bahan pada bungkusan. Dua format piawai: **CycloneDX** dan **SPDX**. Gunanya: apabila kerentanan baharu diumumkan (seperti Log4Shell), anda boleh menyoal SBOM yang disimpan untuk tahu **serta-merta** app mana terjejas, tanpa mengimbas semula semua.
+**SBOM** (Software Bill of Materials) ialah senarai komponen dalam perisian anda, seperti senarai bahan pada bungkusan. Dua format piawai: **CycloneDX** dan **SPDX**. Gunanya: apabila vulnerability baharu diumumkan (seperti Log4Shell), anda boleh menyoal SBOM yang disimpan untuk tahu **serta-merta** app mana terjejas, tanpa mengimbas semula semua.
 
-**VEX** ialah pasangan SBOM: dokumen yang menyatakan sama ada sesuatu kerentanan benar-benar boleh dieksploit dalam produk anda (`not_affected`, `affected`, `fixed`). Ia mengurangkan bunyi.
+**VEX** ialah pasangan SBOM: dokumen yang menyatakan sama ada sesuatu vulnerability benar-benar boleh dieksploit dalam produk anda (`not_affected`, `affected`, `fixed`). Ia mengurangkan bunyi.
 
 ### Pakej yang direka oleh AI
 
@@ -95,7 +95,7 @@ Soalan:
 
 <div class="trk trk-a" markdown="1">
 
-**4 pakej**: dua langsung (`Newtonsoft.Json 12.0.3` High; `SharpZipLib 1.3.2` High dan dua Moderate), dan dua **transitif yang tidak kita rancang**: `Microsoft.OpenApi 2.0.0` (dibawa oleh `Microsoft.AspNetCore.OpenApi`) dan `SQLitePCLRaw.lib.e_sqlite3 2.1.11` (dibawa oleh `Microsoft.Data.Sqlite`). Kerentanan transitif tidak kelihatan dalam `.csproj`; hanya alat yang membaca graf penuh menunjukkannya.
+**4 pakej**: dua langsung (`Newtonsoft.Json 12.0.3` High; `SharpZipLib 1.3.2` High dan dua Moderate), dan dua **transitif yang tidak kita rancang**: `Microsoft.OpenApi 2.0.0` (dibawa oleh `Microsoft.AspNetCore.OpenApi`) dan `SQLitePCLRaw.lib.e_sqlite3 2.1.11` (dibawa oleh `Microsoft.Data.Sqlite`). Vulnerability transitif tidak kelihatan dalam `.csproj`; hanya alat yang membaca graf penuh menunjukkannya.
 </div>
 
 <div class="trk trk-b" markdown="1">
@@ -169,7 +169,7 @@ dotnet list package --vulnerable --include-transitive
 cd ..
 ```
 
-Perhatikan trik pada baris ketiga: `Microsoft.OpenApi` ialah pakej **transitif**. Dengan menambahnya sebagai pakej langsung pada versi yang lebih baharu, anda **menimpa** versi yang dibawa secara transitif. Ini cara biasa membaiki kerentanan transitif apabila pakej induk belum dikemas kini.
+Perhatikan trik pada baris ketiga: `Microsoft.OpenApi` ialah pakej **transitif**. Dengan menambahnya sebagai pakej langsung pada versi yang lebih baharu, anda **menimpa** versi yang dibawa secara transitif. Ini cara biasa membaiki vulnerability transitif apabila pakej induk belum dikemas kini.
 
 </div>
 
@@ -219,7 +219,7 @@ docker rm -f kedai
 
 <div class="trk trk-a" markdown="1">
 
-Kerentanan turun daripada **6 CVE** kepada **1**: `SQLitePCLRaw.lib.e_sqlite3` (CVE-2025-6965, High) kekal **tanpa versi dibaiki**. App masih berjalan dan `/api/import` memulangkan `JObject`. Semak `git diff` untuk `AspNetLab.csproj` dan `packages.lock.json`.
+Vulnerability turun daripada **6 CVE** kepada **1**: `SQLitePCLRaw.lib.e_sqlite3` (CVE-2025-6965, High) kekal **tanpa versi dibaiki**. App masih berjalan dan `/api/import` memulangkan `JObject`. Semak `git diff` untuk `AspNetLab.csproj` dan `packages.lock.json`.
 </div>
 
 <div class="trk trk-b" markdown="1">
@@ -249,7 +249,7 @@ Anda akan melihat `Clean`. Tarikh luput memaksa semakan semula: selepas itu temu
 
 <div class="trk trk-b" markdown="1">
 
-Semua kerentanan sudah dibaiki. Untuk melihat cara terima risiko, andaikan anda mahu mengabaikan CVE-2021-34551 buat sementara (anda tidak perlu benar-benar melakukannya):
+Semua vulnerability sudah dibaiki. Untuk melihat cara terima risiko, andaikan anda mahu mengabaikan CVE-2021-34551 buat sementara (anda tidak perlu benar-benar melakukannya):
 
 ```bash
 git stash          # simpan pembaikan anda
@@ -264,7 +264,7 @@ Bilangan CVE turun satu apabila dimasukkan dalam `.trivyignore`.
 
 </div>
 
-**Pintu CI.** Untuk menggagalkan pipeline bila ada kerentanan serius:
+**Pintu CI.** Untuk menggagalkan pipeline bila ada vulnerability serius:
 
 <div class="trk trk-a" markdown="1">
 
@@ -286,7 +286,7 @@ trivy fs --scanners vuln --severity HIGH,CRITICAL --exit-code 1 laravel-app; ech
 
 `--exit-code 1` menjadikan Trivy memulangkan `1` bila ada temuan, yang menggagalkan job CI. Tanpa pengecualian `.trivyignore`, **Trek A** memberi `exit=1` kerana `e_sqlite3` kekal.
 
-> Pilihan `--ignore-unfixed` menyembunyikan kerentanan tanpa versi dibaiki. Ia mengurangkan bunyi tetapi juga menyembunyikan risiko sebenar. Guna dengan sedar, dan rekodkan keputusan, bukan sekadar menghidupkan bendera.
+> Pilihan `--ignore-unfixed` menyembunyikan vulnerability tanpa versi dibaiki. Ia mengurangkan bunyi tetapi juga menyembunyikan risiko sebenar. Guna dengan sedar, dan rekodkan keputusan, bukan sekadar menghidupkan bendera.
 
 ---
 
@@ -420,7 +420,7 @@ Jika penyerang mendaftarkan nama itu esok, pakej itu **wujud** dan lulus semakan
 
 - [ ] Saya menjalankan audit asal ekosistem dan Trivy, dan faham bezanya
 - [ ] Saya tahu kenapa Trivy tidak melihat pakej .NET tanpa `packages.lock.json` (Trek A) atau kenapa `composer audit` memerlukan `--locked` (Trek B)
-- [ ] Saya menaikkan versi pakej, mengesahkan app masih berfungsi, dan melihat kerentanan turun
+- [ ] Saya menaikkan versi pakej, mengesahkan app masih berfungsi, dan melihat vulnerability turun
 - [ ] Saya tahu cara terima risiko dengan `.trivyignore` yang ada tarikh luput, dan cara menjadikan Trivy pintu dengan `--exit-code 1`
 - [ ] Saya menjana SBOM kod sumber dan imej, dan mengimbas SBOM dengan `trivy sbom`
 - [ ] Saya menyemak pakej yang dicadangkan AI sebelum menambahnya

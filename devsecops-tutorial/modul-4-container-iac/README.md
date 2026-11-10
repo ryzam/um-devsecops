@@ -4,7 +4,7 @@
 
 Dalam modul ini anda akan:
 
-1. Mengimbas imej kontena dan memahami dari mana kerentanan datang (OS, runtime, pakej app).
+1. Mengimbas imej kontena dan memahami dari mana vulnerability datang (OS, runtime, pakej app).
 2. Mengimbas **Dockerfile** dengan tiga alat dan membandingkan apa yang setiap satu tegur.
 3. Membina semula imej dengan Dockerfile yang **lebih selamat** (multi-stage, bukan root, tiada secret) dan mengukur perbezaannya.
 4. Menolak imej ke **Harbor**, melihat imbasan automatik, dan menguji polisi yang menyekat imej berisiko, termasuk cara menerima risiko dengan **allowlist CVE**.
@@ -27,7 +27,7 @@ Dalam modul ini anda akan:
 
 ## Teori ringkas
 
-### Dari mana kerentanan dalam imej datang
+### Dari mana vulnerability dalam imej datang
 
 Satu imej ialah timbunan lapisan. Setiap lapisan membawa pakej:
 
@@ -43,11 +43,11 @@ Setiap pakej yang tidak perlu semasa app berjalan hanya menambah **permukaan ser
 | Amalan | Kenapa |
 |---|---|
 | **Multi-stage build** | Alat binaan (SDK, composer, git) kekal dalam peringkat binaan, bukan imej akhir |
-| **Imej asas yang kecil dan sesuai** (`aspnet` bukan `sdk`; Alpine) | Lebih sedikit pakej, lebih sedikit kerentanan |
+| **Imej asas yang kecil dan sesuai** (`aspnet` bukan `sdk`; Alpine) | Lebih sedikit pakej, lebih sedikit vulnerability |
 | **Bukan root** (`USER`) | Jika app dieksploit, penyerang tidak mendapat root dalam kontena |
 | **Tiada secret dalam imej** | Imej disimpan dan dikongsi; secret dalam lapisan kekal selamanya |
 | **`HEALTHCHECK`** | Orkestra tahu bila app tidak sihat |
-| **Kemas kini pakej OS** semasa binaan | Menutup kerentanan yang sudah ada pembaikan |
+| **Kemas kini pakej OS** semasa binaan | Menutup vulnerability yang sudah ada pembaikan |
 | **Kunci versi imej asas** (tag tepat atau digest) | Binaan boleh diulang; tiada perubahan senyap |
 
 ### Empat alat IaC, empat peranan
@@ -106,7 +106,7 @@ Untuk mengecualikan satu semakan yang anda putuskan tidak relevan, gunakan `--sk
 **Harbor** ialah registry kontena sumber terbuka. Ciri yang kita guna:
 
 - **Imbasan automatik** (Trivy terbina dalam) pada setiap push.
-- **Polisi pencegahan**: sekat `pull` imej yang mempunyai kerentanan pada atau melebihi ambang yang ditetapkan.
+- **Polisi pencegahan**: sekat `pull` imej yang mempunyai vulnerability pada atau melebihi ambang yang ditetapkan.
 - **Allowlist CVE**: kecualikan CVE tertentu dengan tarikh luput.
 - **Robot account**: kelayakan khusus untuk CI, dengan kebenaran terhad pada satu projek.
 - **Kuota** dan kawalan akses mengikut projek.
@@ -122,17 +122,17 @@ Anda akan menggunakan Trivy di dua tempat. Enjinnya sama, tetapi peranannya berb
 | | Trivy di laptop (`alat.sh`) | Trivy di Harbor |
 |---|---|---|
 | **Cara dijalankan** | Anda taip `trivy ...` (kontena Docker, v0.76.2 dikunci) | Scanner terbina dalam Harbor; berjalan sendiri selepas `docker push` |
-| **Apa yang boleh diimbas** | Banyak sasaran: `fs` (kod dan dependency), `config` (Dockerfile, K8s, Terraform), `image` dan secret | Hanya **imej** yang sudah ada dalam Harbor, untuk kerentanan pakej (OS dan bahasa) |
+| **Apa yang boleh diimbas** | Banyak sasaran: `fs` (kod dan dependency), `config` (Dockerfile, K8s, Terraform), `image` dan secret | Hanya **imej** yang sudah ada dalam Harbor, untuk vulnerability pakej (OS dan bahasa) |
 | **Pilihan** | Bebas: `--severity`, `--exit-code`, `.trivyignore`, format output | Tetapan projek: imbas automatik, dan ambang polisi |
 | **Keputusan** | Dipaparkan dalam terminal; anda yang bertindak | Disimpan di Harbor (tab *Vulnerabilities*), dan **dikuatkuasakan** |
 | **Kesan** | Tiada, melainkan anda menyemak `exit` | Polisi *Prevent vulnerable images from running* pada ambang **High**: imej yang melebihinya ditolak semasa `pull` dengan HTTP 412 |
-| **Pangkalan data kerentanan** | Dimuat turun ke laptop anda apabila dijalankan | Dikemas kini oleh Harbor sendiri di server |
+| **Pangkalan data vulnerability** | Dimuat turun ke laptop anda apabila dijalankan | Dikemas kini oleh Harbor sendiri di server |
 
 Empat perkara yang perlu diingat:
 
 1. **Skop.** Trivy di Harbor tidak memeriksa kod sumber, manifest K8s atau Terraform. Imbasan `fs` dan `config` hanya boleh dibuat di laptop atau CI.
 2. **Pintu yang berbeza.** Dalam pipeline (Modul 6), Trivy imej menggagalkan job pada `CRITICAL` **sebelum** `docker push`. Harbor menyekat pada `High` **selepas** imej sampai. Maka imej `High` boleh masuk ke Harbor, tetapi tiada sesiapa boleh menariknya.
-3. **Keputusan boleh berbeza.** Imej yang sama boleh memberi bilangan temuan berlainan di laptop dan di Harbor kerana pangkalan data kerentanan dikemas kini pada masa yang berbeza, dan versi Trivy berbeza: Harbor 2.15.4 membawa Trivy v0.75.0 (disemak pada server lab), manakala laptop anda menggunakan v0.76.2.
+3. **Keputusan boleh berbeza.** Imej yang sama boleh memberi bilangan temuan berlainan di laptop dan di Harbor kerana pangkalan data vulnerability dikemas kini pada masa yang berbeza, dan versi Trivy berbeza: Harbor 2.15.4 membawa Trivy v0.75.0 (disemak pada server lab), manakala laptop anda menggunakan v0.76.2.
 4. **Harbor ialah kawalan yang tidak boleh dielak.** Imbasan di laptop boleh dilangkau oleh pembangun, tetapi polisi Harbor menyekat imej berisiko semasa `pull` tanpa mengira bagaimana imej itu sampai ke sana.
 
 Ringkasnya, Trivy di laptop ialah alat untuk **menyiasat** (luas, pantas, fleksibel), dan Trivy di Harbor ialah **pintu terakhir** bagi imej (sempit, automatik, mengikat).
@@ -163,7 +163,7 @@ docker images laravel-app:latest --format "saiz: {{.Size}}"
 
 </div>
 
-Trivy menggunakan soket Docker (disambungkan oleh `alat.sh`) untuk membaca imej tempatan. Imbasan pertama memuat turun pangkalan data kerentanan.
+Trivy menggunakan soket Docker (disambungkan oleh `alat.sh`) untuk membaca imej tempatan. Imbasan pertama memuat turun pangkalan data vulnerability.
 
 Soalan:
 
@@ -175,12 +175,12 @@ Soalan:
 
 <div class="trk trk-a" markdown="1">
 
-Imej `aspnet-app:latest` bersaiz **≈ 1.7 GB** kerana ia berasaskan imej **SDK** (`dotnet/sdk`) yang membawa pengkompil dan alat binaan, dan app tidak memerlukannya semasa berjalan. Laporan menyenaraikan bahagian OS (Ubuntu 24.04) dan beberapa fail `*.deps.json` untuk pakej .NET (kerentanan yang sama dilaporkan berulang kali kerana fail itu wujud di beberapa tempat). Bilangan kerentanan High melebihi 10 kerana pengulangan ini.
+Imej `aspnet-app:latest` bersaiz **≈ 1.7 GB** kerana ia berasaskan imej **SDK** (`dotnet/sdk`) yang membawa pengkompil dan alat binaan, dan app tidak memerlukannya semasa berjalan. Laporan menyenaraikan bahagian OS (Ubuntu 24.04) dan beberapa fail `*.deps.json` untuk pakej .NET (vulnerability yang sama dilaporkan berulang kali kerana fail itu wujud di beberapa tempat). Bilangan vulnerability High melebihi 10 kerana pengulangan ini.
 </div>
 
 <div class="trk trk-b" markdown="1">
 
-Imej `laravel-app:latest` bersaiz **≈ 1 GB** dan membawa **≈ 1,470 kerentanan** (3 Critical, 97 High, 460 Medium, 898 Low): ia berasaskan `php:8.4-cli` (Debian penuh) dengan `git`, `unzip` dan `composer` ditambah. Hampir semuanya pakej OS yang app tidak guna.
+Imej `laravel-app:latest` bersaiz **≈ 1 GB** dan membawa **≈ 1,470 vulnerability** (3 Critical, 97 High, 460 Medium, 898 Low): ia berasaskan `php:8.4-cli` (Debian penuh) dengan `git`, `unzip` dan `composer` ditambah. Hampir semuanya pakej OS yang app tidak guna.
 </div>
 </details>
 
@@ -318,16 +318,16 @@ docker rm -f kedai
 
 - Saiz imej turun daripada ≈ **1.7 GB** kepada ≈ **0.4 GB**.
 - `trivy config` dan Checkov tidak melaporkan kegagalan lagi; hadolint hanya memberi `DL3008` (versi pakej `apt` tidak dikunci, amaran yang diterima).
-- `trivy image` (selepas Modul 3): tiada kerentanan OS High, dan **satu** High pada pakej app (`SQLitePCLRaw.lib.e_sqlite3`, CVE-2025-6965, tiada versi dibaiki). Pada imej lama ia melaporkan juga OS High dan pengulangan.
-- App berjalan sebagai `app`, `ping` masih berfungsi, kesihatan `healthy`. **Kod app masih rentan** (SQL injection di `/login` dan lain-lain, melainkan anda sudah menerapkan tampalan Modul 2): imej yang lebih selamat tidak membaiki kelemahan dalam kod.
+- `trivy image` (selepas Modul 3): tiada vulnerability OS High, dan **satu** High pada pakej app (`SQLitePCLRaw.lib.e_sqlite3`, CVE-2025-6965, tiada versi dibaiki). Pada imej lama ia melaporkan juga OS High dan pengulangan.
+- App berjalan sebagai `app`, `ping` masih berfungsi, kesihatan `healthy`. **Kod app masih vulnerable** (SQL injection di `/login` dan lain-lain, melainkan anda sudah menerapkan tampalan Modul 2): imej yang lebih selamat tidak membaiki vulnerability dalam kod.
 </div>
 
 <div class="trk trk-b" markdown="1">
 
 - Saiz imej turun daripada ≈ **1 GB** kepada ≈ **0.2 GB**.
 - `trivy config` dan Checkov tidak melaporkan kegagalan lagi; hadolint hanya memberi `DL3018` (versi pakej `apk` tidak dikunci).
-- `trivy image`: kerentanan jatuh daripada ≈ **1,470** kepada **≈ 5** (selepas Modul 3: 1 Medium sahaja). Imej Alpine dengan hanya pakej yang diperlukan menghapuskan hampir semua bunyi.
-- App berjalan sebagai `aplikasi`, `ping` dan carian berfungsi. **Kod app masih rentan** melainkan anda sudah menerapkan tampalan Modul 2.
+- `trivy image`: vulnerability jatuh daripada ≈ **1,470** kepada **≈ 5** (selepas Modul 3: 1 Medium sahaja). Imej Alpine dengan hanya pakej yang diperlukan menghapuskan hampir semua bunyi.
+- App berjalan sebagai `aplikasi`, `ping` dan carian berfungsi. **Kod app masih vulnerable** melainkan anda sudah menerapkan tampalan Modul 2.
 </div>
 
 Pengajaran: pengerasan imej dan pembaikan kod ialah dua kerja berbeza. Kedua-duanya perlu.
@@ -391,12 +391,12 @@ docker pull harbor.lab.test/$P/laravel-app:selamat
 
 <div class="trk trk-a" markdown="1">
 
-`docker pull` **gagal** dengan `412 Precondition Failed`. Imej anda ada satu kerentanan **High**: `CVE-2025-6965` pada `SQLitePCLRaw.lib.e_sqlite3`, yang tidak ada versi dibaiki. Polisi bekerja seperti direka.
+`docker pull` **gagal** dengan `412 Precondition Failed`. Imej anda ada satu vulnerability **High**: `CVE-2025-6965` pada `SQLitePCLRaw.lib.e_sqlite3`, yang tidak ada versi dibaiki. Polisi bekerja seperti direka.
 </div>
 
 <div class="trk trk-b" markdown="1">
 
-`docker pull` **berjaya**. Imej Alpine anda hanya mempunyai satu kerentanan Medium, di bawah ambang High, jadi polisi membenarkannya. Untuk melihat polisi menyekat, tolak imej lama anda sebagai tag lain: `docker tag laravel-app:latest harbor.lab.test/$P/laravel-app:lama`, push, tunggu imbasan, dan cuba tarik: ia gagal dengan 412.
+`docker pull` **berjaya**. Imej Alpine anda hanya mempunyai satu vulnerability Medium, di bawah ambang High, jadi polisi membenarkannya. Untuk melihat polisi menyekat, tolak imej lama anda sebagai tag lain: `docker tag laravel-app:latest harbor.lab.test/$P/laravel-app:lama`, push, tunggu imbasan, dan cuba tarik: ia gagal dengan 412.
 </div>
 </details>
 
@@ -501,7 +501,7 @@ Robot hanya boleh bertindak dalam projek anda; percubaan menolak ke projek lain 
 
 ## Senarai semak Modul 4
 
-- [ ] Saya mengimbas imej dan tahu dari mana kerentanan datang
+- [ ] Saya mengimbas imej dan tahu dari mana vulnerability datang
 - [ ] Saya membandingkan hadolint, Trivy config dan Checkov pada Dockerfile
 - [ ] Saya menggantikan Dockerfile, membina imej yang lebih kecil dan app masih berfungsi sebagai bukan root
 - [ ] Saya menolak imej ke Harbor, melihat imbasan, dan menguji polisi (pull ditolak atau dibenarkan)

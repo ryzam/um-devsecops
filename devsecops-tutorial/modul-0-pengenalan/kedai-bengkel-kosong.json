@@ -3,7 +3,7 @@
   "summary": {
     "title": "Kedai Bengkel",
     "owner": "Bengkel DevSecOps",
-    "description": "Model ancaman app lab Kedai Bengkel (ASP.NET Core dan Laravel). Sengaja rentan, untuk latihan sahaja.",
+    "description": "Model ancaman app lab Kedai Bengkel (ASP.NET Core dan Laravel). Sengaja vulnerable, untuk latihan sahaja.",
     "id": 0
   },
   "detail": {

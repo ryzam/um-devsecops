@@ -1,7 +1,7 @@
 <?php
 // Contoh kod yang "dijana asisten AI" untuk permintaan:
 //   "Tulis skrip PHP untuk carian pengguna, muat halaman dan simpan tetapan daripada cookie."
-// Ia kelihatan kemas dan berfungsi, tetapi mengandungi kelemahan tipikal. Jangan guna dalam projek sebenar.
+// Ia kelihatan kemas dan berfungsi, tetapi mengandungi vulnerability tipikal. Jangan guna dalam projek sebenar.
 
 $db = new mysqli('db.kedai.test', 'root', 'Xk29vQ7mPz41Lr8T', 'kedai');
 

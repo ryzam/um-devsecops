@@ -10,7 +10,7 @@ Dalam modul ini anda akan:
 4. Membaiki XSS, path traversal, open redirect, header keselamatan (dan CSRF pada Laravel), kemudian mengesahkan dengan imbasan semula.
 5. Menetapkan **quality gate** DAST melalui exit code dan fail konfigurasi.
 
-> Prasyarat: [Modul 4](../modul-4-container-iac/README.md) siap; `alat.sh` terkini (fungsi `zap` membawa had memori). Imej `aspnet-app:latest` atau `laravel-app:latest` daripada Modul 0 masih ada (ia mengandungi kod asal yang rentan).
+> Prasyarat: [Modul 4](../modul-4-container-iac/README.md) siap; `alat.sh` terkini (fungsi `zap` membawa had memori). Imej `aspnet-app:latest` atau `laravel-app:latest` daripada Modul 0 masih ada (ia mengandungi kod asal yang vulnerable).
 
 > **Amaran.** Jangan sekali-kali menjalankan imbasan aktif terhadap sistem yang bukan milik anda tanpa kebenaran bertulis. Imbasan aktif menghantar muatan serangan sebenar dan boleh mengubah data, menyebabkan ralat atau menjatuhkan app. Lakukan hanya terhadap app ujian.
 
@@ -31,7 +31,7 @@ Dalam modul ini anda akan:
 
 ### DAST dan SAST
 
-**DAST** (Dynamic Application Security Testing) menyerang app yang **sedang berjalan** dari luar seperti penyerang, tanpa melihat kod. Ia menemui masalah yang SAST tidak nampak: konfigurasi runtime (header, CORS), kelemahan yang bergantung pada cara pelayan sebenarnya menjawab, dan bukti bahawa sesuatu **boleh dieksploit**.
+**DAST** (Dynamic Application Security Testing) menyerang app yang **sedang berjalan** dari luar seperti penyerang, tanpa melihat kod. Ia menemui masalah yang SAST tidak nampak: konfigurasi runtime (header, CORS), vulnerability yang bergantung pada cara pelayan sebenarnya menjawab, dan bukti bahawa sesuatu **boleh dieksploit**.
 
 | | SAST | DAST |
 |---|---|---|
@@ -43,8 +43,8 @@ Dalam modul ini anda akan:
 
 ### Pasif dan aktif
 
-- **Pasif**: ZAP hanya **memerhati** permintaan dan jawapan biasa, dan menegur apa yang kelihatan (header tiada, cookie tanpa bendera). Selamat dan pantas, tetapi tidak menemui kelemahan yang perlu diserang untuk dilihat.
-- **Aktif**: ZAP **menghantar muatan serangan** (cuba suntikan SQL, skrip, laluan `../`) dan memerhati reaksi. Ia menemui kelemahan sebenar tetapi lebih perlahan, boleh mengubah data, dan perlu dijalankan pada persekitaran ujian.
+- **Pasif**: ZAP hanya **memerhati** permintaan dan jawapan biasa, dan menegur apa yang kelihatan (header tiada, cookie tanpa bendera). Selamat dan pantas, tetapi tidak menemui vulnerability yang perlu diserang untuk dilihat.
+- **Aktif**: ZAP **menghantar muatan serangan** (cuba suntikan SQL, skrip, laluan `../`) dan memerhati reaksi. Ia menemui vulnerability sebenar tetapi lebih perlahan, boleh mengubah data, dan perlu dijalankan pada persekitaran ujian.
 
 ### Mod ZAP yang kita guna
 
@@ -215,9 +215,9 @@ Laluan seperti `/redirect`, `/admin`, `/api/users/{id}`, `/api/profile/{id}` dan
 
 **Tujuan.** Menggabungkan semua yang anda tahu.
 
-Isi jadual ini bagi **sekurang-kurangnya lapan** kelemahan daripada threat model Modul 0:
+Isi jadual ini bagi **sekurang-kurangnya lapan** vulnerability daripada threat model Modul 0:
 
-| Kelemahan | Semgrep (Modul 2) | ZAP (modul ini) | Hanya manual |
+| Vulnerability | Semgrep (Modul 2) | ZAP (modul ini) | Hanya manual |
 |---|---|---|---|
 | SQL injection log masuk | | | |
 | XSS tersimpan (guestbook) | | | |
@@ -231,7 +231,7 @@ Isi jadual ini bagi **sekurang-kurangnya lapan** kelemahan daripada threat model
 
 <div class="trk trk-a" markdown="1">
 
-| Kelemahan | Semgrep | ZAP | Hanya manual |
+| Vulnerability | Semgrep | ZAP | Hanya manual |
 |---|---|---|---|
 | SQL injection log masuk | ✔ (`p/gitlab`) | ✔ (pelan, bukan API) | |
 | XSS tersimpan | ✘ | ✔ | |
@@ -245,7 +245,7 @@ Isi jadual ini bagi **sekurang-kurangnya lapan** kelemahan daripada threat model
 
 <div class="trk trk-b" markdown="1">
 
-| Kelemahan | Semgrep | ZAP | Hanya manual |
+| Vulnerability | Semgrep | ZAP | Hanya manual |
 |---|---|---|---|
 | SQL injection log masuk | ✘ | ✔ | |
 | XSS tersimpan | ✘ | ✔ | |
@@ -258,14 +258,14 @@ Isi jadual ini bagi **sekurang-kurangnya lapan** kelemahan daripada threat model
 
 </div>
 
-Corak jelas: **kelemahan logik** (kebenaran, IDOR, cookie) hanya ditemui oleh manusia. SAST dan DAST saling melengkapi, dan kedua-duanya meninggalkan jurang yang menuntut ujian manual dan semakan reka bentuk (threat model). Jadual penuh dengan alat interaktif ada di [Modul 7](../modul-7-hardening/README.md#rumusan-alat-mana-menangkap-apa).
+Corak jelas: **vulnerability logik** (kebenaran, IDOR, cookie) hanya ditemui oleh manusia. SAST dan DAST saling melengkapi, dan kedua-duanya meninggalkan jurang yang menuntut ujian manual dan semakan reka bentuk (threat model). Jadual penuh dengan alat interaktif ada di [Modul 7](../modul-7-hardening/README.md#rumusan-alat-mana-menangkap-apa).
 </details>
 
 ---
 
 ## Makmal 5.6: Baiki dan imbas semula
 
-**Tujuan.** Menutup kelemahan DAST dan mengesahkan dengan imbasan.
+**Tujuan.** Menutup vulnerability DAST dan mengesahkan dengan imbasan.
 
 Simpan tampalan DAST (bahagian **Fail modul**) dalam folder repo. Tampalan ini **mengandaikan tampalan SAST Modul 2 sudah diterapkan** (ia bina di atasnya). Jika anda menulis pembaikan sendiri, baca tampalan sebagai rujukan dan salin idea.
 
@@ -342,7 +342,7 @@ Isyarat jatuh daripada **18** kepada **7**, dan **tiada lagi isyarat Tinggi**. Y
 Isyarat jatuh daripada **17** kepada **8**, dan **tiada lagi isyarat Tinggi atau anti-CSRF**. Yang kekal: amaran CSP tentang arahan tanpa *fallback*, cookie `Laravel` sendiri tanpa `HttpOnly`, dan `X-Powered-By` yang didedahkan oleh pelayan PHP terbina dalam.
 </div>
 
-Ingat: pelan aktif menyerang apa yang ia jumpa. Kelemahan logik (cookie palsu, IDOR) **masih ada** kerana ia tidak ditampal dan tidak pernah dikesan.
+Ingat: pelan aktif menyerang apa yang ia jumpa. Vulnerability logik (cookie palsu, IDOR) **masih ada** kerana ia tidak ditampal dan tidak pernah dikesan.
 </details>
 
 Hentikan: `docker rm -f kedai`.
@@ -374,7 +374,7 @@ Pendekatan yang praktikal: mulakan dengan beberapa peraturan penting sebagai FAI
 
 - [ ] Saya menjalankan baseline, imbasan aktif (pelan) dan (Trek A) imbasan API, dan tahu apa yang setiap satu temui
 - [ ] Saya faham kenapa `zap-full-scan` tidak digunakan pada laptop 8 GB, dan apa yang dilakukan pelan
-- [ ] Saya menyenaraikan kelemahan yang SAST temui, DAST temui, dan hanya ujian manual temui
+- [ ] Saya menyenaraikan vulnerability yang SAST temui, DAST temui, dan hanya ujian manual temui
 - [ ] Saya menerapkan tampalan DAST, mengesahkan fungsi, dan imbasan semula tiada isyarat Tinggi
 - [ ] Saya boleh menggagalkan pipeline melalui exit code dan fail konfigurasi ZAP
 - [ ] Saya faham bahawa DAST hanya menguji apa yang ia jumpa

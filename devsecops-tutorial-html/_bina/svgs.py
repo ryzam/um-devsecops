@@ -167,7 +167,7 @@ def seni_bina_makmal():
 
 def aliran_harbor():
     d = D("ah", 900, 300, "Aliran image ke Harbor",
-          "Image dibina dan ditolak ke Harbor. Trivy mengimbas secara automatik. Polisi menyekat pull jika ada kerentanan High atau lebih tinggi, "
+          "Image dibina dan ditolak ke Harbor. Trivy mengimbas secara automatik. Polisi menyekat pull jika ada vulnerability High atau lebih tinggi, "
           "dengan jawapan HTTP 412; image bersih boleh ditarik.")
     d.rect(10, 14, 880, 44, "zone", 8)
     d.text(26, 41, "Perhatian: binaan Docker lalai menambah attestation (OCI index) dan polisi tidak berkuat kuasa. Gunakan --provenance=false.", "ts")

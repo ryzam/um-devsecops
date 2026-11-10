@@ -7,7 +7,7 @@ Dalam modul ini anda akan:
 1. Faham apa itu DevSecOps, shift-left dan quality gate, dan kenapa kontena serta kod yang dijana AI mengubah risiko.
 2. Kenal lima jenis imbasan dan di mana setiap satu berada dalam pipeline.
 3. Membaca dan memahami **threat model** untuk app Kedai Bengkel, yang dibina daripada gambar rajah aliran data dan STRIDE.
-4. Menjalankan app lab dan **mengeksploit** tiga kelemahan secara manual, supaya anda tahu apa yang imbasan sepatutnya tangkap.
+4. Menjalankan app lab dan **mengeksploit** tiga vulnerability secara manual, supaya anda tahu apa yang imbasan sepatutnya tangkap.
 
 > Prasyarat: bahagian [Persediaan](../00-persediaan/README.md) siap, terutama Docker dan repo lab.
 
@@ -27,7 +27,7 @@ Dalam modul ini anda akan:
 
 ### DevSecOps dan shift-left
 
-**DevSecOps** menjadikan keselamatan tanggungjawab bersama sepanjang kitaran pembangunan, bukan semakan akhir oleh pasukan lain. **Shift-left** bermaksud mengalihkan pemeriksaan ke peringkat awal (ke kiri pada garis masa): kelemahan yang ditemui semasa commit memakan masa minit untuk dibaiki; yang ditemui di produksi memakan hari, dan kadang-kadang melibatkan insiden.
+**DevSecOps** menjadikan keselamatan tanggungjawab bersama sepanjang kitaran pembangunan, bukan semakan akhir oleh pasukan lain. **Shift-left** bermaksud mengalihkan pemeriksaan ke peringkat awal (ke kiri pada garis masa): vulnerability yang ditemui semasa commit memakan masa minit untuk dibaiki; yang ditemui di produksi memakan hari, dan kadang-kadang melibatkan insiden.
 
 Sebuah **quality gate** ialah syarat automatik dalam pipeline: jika imbasan menemui sesuatu yang melebihi had yang ditetapkan, pipeline gagal dan perubahan tidak bergerak ke hadapan.
 
@@ -37,7 +37,7 @@ Sebuah **quality gate** ialah syarat automatik dalam pipeline: jika imbasan mene
 |---|---|---|
 | **Secret Detection** | Adakah ada kata laluan atau kunci dalam kod dan sejarah git? | Gitleaks |
 | **SAST** | Adakah kod sumber mengandungi corak yang tidak selamat? | Semgrep |
-| **SCA** | Adakah pakej pihak ketiga ada kerentanan yang diketahui? | Trivy, `dotnet list package`, `composer audit` |
+| **SCA** | Adakah pakej pihak ketiga ada vulnerability yang diketahui? | Trivy, `dotnet list package`, `composer audit` |
 | **IaC** | Adakah Dockerfile, manifest K8s dan Terraform tidak selamat? | Trivy config, Checkov, hadolint, kube-linter |
 | **DAST** | Adakah app yang sedang berjalan boleh diserang? | ZAP |
 
@@ -61,7 +61,7 @@ Tiada alat imbasan yang dipasang pada laptop: setiap satu ialah kontena Docker y
 
 ### Kenapa kontena dan AI mengubah risiko
 
-- **Kontena** membungkus app bersama OS dan pakejnya. Satu image membawa ratusan pakej yang anda tidak tulis. Image lama atau berasaskan SDK membawa kerentanan, dan konfigurasi runtime (root, privileged) menentukan seberapa buruk kesan jika app dieksploit.
+- **Kontena** membungkus app bersama OS dan pakejnya. Satu image membawa ratusan pakej yang anda tidak tulis. Image lama atau berasaskan SDK membawa vulnerability, dan konfigurasi runtime (root, privileged) menentukan seberapa buruk kesan jika app dieksploit.
 - **Kod yang dijana AI** ditulis laju dan kelihatan betul. Ia boleh mengandungi corak tidak selamat (SQL digabung dengan rentetan), dan boleh mencadangkan **pakej yang tidak wujud** atau yang diambil alih penyerang. Kelajuan menulis tidak menambah kelajuan menyemak, jadi imbasan automatik menjadi lebih penting, bukan kurang.
 - **Aplikasi yang menggunakan LLM** menambah kelas risiko baharu (prompt injection, kebocoran data melalui prompt). OWASP Top 10 for LLM Applications ialah rujukan permulaan. Ia di luar skop makmal, tetapi ancaman dalam senarai itu dimodelkan dengan cara yang sama seperti di bawah.
 
@@ -230,7 +230,7 @@ Binaan pertama ≈ 2 minit kerana Composer memuat turun dependency. Jawapan `200
 
 ## Makmal 0.3: Eksploit manual
 
-**Tujuan.** Rasa sendiri kesan tiga kelemahan. Ini ialah **sebab** kita mengimbas.
+**Tujuan.** Rasa sendiri kesan tiga vulnerability. Ini ialah **sebab** kita mengimbas.
 
 Ini dibenarkan kerana app ialah milik anda dan berjalan pada laptop anda sendiri.
 
@@ -359,11 +359,11 @@ Buka <https://harbor.lab.test> dalam pelayar dan log masuk sebagai `pesertaNN`. 
 
 1. Klik **Projects**, kemudian projek anda (`pesertaNN`).
 2. Dalam tab **Repositories**, klik nama repositori (contohnya `pesertaNN/aspnet-app`).
-3. Anda melihat senarai **Artifacts**, satu baris bagi setiap tag atau digest. Lajur **Vulnerabilities** menunjukkan ringkasan imbasan: bilangan kerentanan mengikut tahap (Critical, High, Medium, Low). Harbor mengimbas secara automatik selepas push, jadi tunggu beberapa saat; jika lajur masih menunjukkan status belum selesai, muat semula halaman.
+3. Anda melihat senarai **Artifacts**, satu baris bagi setiap tag atau digest. Lajur **Vulnerabilities** menunjukkan ringkasan imbasan: bilangan vulnerability mengikut tahap (Critical, High, Medium, Low). Harbor mengimbas secara automatik selepas push, jadi tunggu beberapa saat; jika lajur masih menunjukkan status belum selesai, muat semula halaman.
 4. Klik **digest** artifact (teks yang bermula dengan `sha256:`) untuk membuka butirannya. Bahagian **Vulnerabilities** menyenaraikan setiap CVE dengan pakej yang terlibat, versi yang dipasang dan versi yang membaikinya (*Fixed in*).
 5. Jika artifact belum diimbas, tandakan baris itu dalam senarai Artifacts dan klik **Scan**.
 
-Imej lab ini sengaja dibina tanpa pembaikan, jadi jangan terkejut jika ia mempunyai banyak kerentanan. Untuk sekarang kita hanya mahu melihat bahawa imbasan berlaku. Cara membaiki dan menyekat imej berisiko dibincangkan di Modul 4. Imbasan ini dibuat oleh Trivy **di dalam Harbor**, yang berbeza daripada Trivy yang anda jalankan di laptop: lihat perbandingan dalam Modul 4, bahagian "Trivy di laptop dan Trivy di Harbor".
+Imej lab ini sengaja dibina tanpa pembaikan, jadi jangan terkejut jika ia mempunyai banyak vulnerability. Untuk sekarang kita hanya mahu melihat bahawa imbasan berlaku. Cara membaiki dan menyekat imej berisiko dibincangkan di Modul 4. Imbasan ini dibuat oleh Trivy **di dalam Harbor**, yang berbeza daripada Trivy yang anda jalankan di laptop: lihat perbandingan dalam Modul 4, bahagian "Trivy di laptop dan Trivy di Harbor".
 
 Hentikan app:
 
@@ -376,7 +376,7 @@ docker rm -f kedai
 - [ ] Saya boleh menerangkan shift-left dan quality gate dengan ayat sendiri
 - [ ] Saya boleh membaca jadual threat model dan menerangkan satu baris: aliran, jenis STRIDE, ancaman dan kawalan
 - [ ] (Pilihan) Saya sudah membuka model dalam Threat Dragon dan menambah ancaman
-- [ ] App saya berjalan dan saya berjaya mengeksploit tiga kelemahan
+- [ ] App saya berjalan dan saya berjaya mengeksploit tiga vulnerability
 - [ ] Saya berjaya push image ke projek Harbor saya dan melihat hasil imbasannya
 - [ ] Saya tahu STRIDE huruf mana untuk setiap serangan tadi
 

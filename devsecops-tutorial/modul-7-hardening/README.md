@@ -128,7 +128,7 @@ Anda melihat amaran semasa `apply`, **tiada pod**, dan peristiwa `FailedCreate` 
 <details>
 <summary>Jawapan: apa yang dilanggar?</summary>
 
-Deployment diterima oleh API server tetapi **pod ditolak** pada penciptaan, dengan mesej seperti: `violates PodSecurity "restricted:latest": host namespaces (hostNetwork=true), hostPort ..., privileged (...), allowPrivilegeEscalation != false, unrestricted capabilities ..., restricted volume types (hostPath volume "docker-sock")`, dan seterusnya. Setiap kelemahan IaC yang Trivy, Checkov dan kube-linter laporkan dalam Modul 4 juga disekat di sini, **pada masa jalan**, walaupun tiada sesiapa membaca laporan imbasan. Itu nilai lapisan admission.
+Deployment diterima oleh API server tetapi **pod ditolak** pada penciptaan, dengan mesej seperti: `violates PodSecurity "restricted:latest": host namespaces (hostNetwork=true), hostPort ..., privileged (...), allowPrivilegeEscalation != false, unrestricted capabilities ..., restricted volume types (hostPath volume "docker-sock")`, dan seterusnya. Setiap vulnerability IaC yang Trivy, Checkov dan kube-linter laporkan dalam Modul 4 juga disekat di sini, **pada masa jalan**, walaupun tiada sesiapa membaca laporan imbasan. Itu nilai lapisan admission.
 </details>
 
 ---
@@ -374,8 +374,8 @@ Perhatikan satu pengajaran: ini hanya berjaya kerana imej `:selamat` anda **suda
 
 **Soalan refleksi** (jawab ringkas semasa demo):
 
-1. Dari semua alat hari ini, mana yang paling menemui kelemahan **sebenar** dan mana yang paling banyak **bunyi**?
-2. Kelemahan mana yang **tiada alat** menemuinya, dan bagaimana anda akan menanganinya?
+1. Dari semua alat hari ini, mana yang paling menemui vulnerability **sebenar** dan mana yang paling banyak **bunyi**?
+2. Vulnerability mana yang **tiada alat** menemuinya, dan bagaimana anda akan menanganinya?
 3. Jika anda hanya boleh menghidupkan **tiga** pintu dalam pipeline pasukan anda esok, yang mana, dan kenapa?
 4. Apa yang anda akan **ukur** untuk tahu keselamatan pasukan anda bertambah baik (cadangan: masa untuk membaiki, bilangan temuan yang terbuka, liputan imbasan)?
 
@@ -383,7 +383,7 @@ Perhatikan satu pengajaran: ini hanya berjaya kerana imej `:selamat` anda **suda
 
 ## Rumusan: alat mana menangkap apa
 
-Gunakan alat ini untuk melihat, bagi setiap kelemahan yang ditanam, **alat mana menangkapnya dan mana terlepas**. Semuanya daripada ujian sebenar yang anda jalankan dalam bengkel ini:
+Gunakan alat ini untuk melihat, bagi setiap vulnerability yang ditanam, **alat mana menangkapnya dan mana terlepas**. Semuanya daripada ujian sebenar yang anda jalankan dalam bengkel ini:
 
 <div data-widget="alat"></div>
 

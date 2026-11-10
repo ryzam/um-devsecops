@@ -1,6 +1,6 @@
 // Contoh kod yang "dijana asisten AI" untuk permintaan:
 //   "Tulis kelas C# untuk log masuk pengguna dan muat turun fail laporan, sambung ke SQL Server."
-// Ia kelihatan kemas dan berfungsi, tetapi mengandungi kelemahan tipikal. Jangan guna dalam projek sebenar.
+// Ia kelihatan kemas dan berfungsi, tetapi mengandungi vulnerability tipikal. Jangan guna dalam projek sebenar.
 using System.Data.SqlClient;
 using System.Net.Http;
 using System.Security.Cryptography;

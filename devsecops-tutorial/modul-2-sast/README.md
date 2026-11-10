@@ -6,7 +6,7 @@ Dalam modul ini anda akan:
 
 1. Faham apa SAST boleh dan tidak boleh lakukan, dan kenapa hasilnya bergantung pada **set peraturan**.
 2. Menjalankan **Semgrep** pada app anda, membandingkan set peraturan dan membuat **triaj** (benar atau positif palsu).
-3. Mengenal pasti kelemahan yang SAST **terlepas**, dan memadankannya dengan threat model anda.
+3. Mengenal pasti vulnerability yang SAST **terlepas**, dan memadankannya dengan threat model anda.
 4. Menerapkan dan memahami pembaikan untuk SQL injection, command injection dan deserialization, kemudian mengesahkannya dengan ujian fungsi **dan** imbasan semula.
 5. Mengimbas kod yang dijana AI dan mengaplikasikan **quality gate** serta pengurusan temuan.
 6. Menjalankan Semgrep sebagai pintu dalam **GitLab CI** dan membaca keputusannya.
@@ -85,7 +85,7 @@ semgrep scan --config p/default --config p/gitlab aspnet-app
 
 Gabungan `p/default` dan `p/gitlab` menjalankan 109 peraturan dan menemui 7 temuan, lebih banyak daripada mana-mana satu set sendirian. Itulah yang Makmal 2.2 tunjukkan.
 
-**Memilih set.** Pilih mengikut **bahasa dan framework**, bukan nama yang paling sepadan. Untuk app ini, `p/csharp` menemui paling sedikit, dan `p/gitlab` menemui SQL injection dan command injection. Untuk Laravel pula, `p/gitlab` menemui 0 temuan dan `p/phpcs-security-audit` yang menemui kelemahan sebenar. Tiada satu set yang cukup.
+**Memilih set.** Pilih mengikut **bahasa dan framework**, bukan nama yang paling sepadan. Untuk app ini, `p/csharp` menemui paling sedikit, dan `p/gitlab` menemui SQL injection dan command injection. Untuk Laravel pula, `p/gitlab` menemui 0 temuan dan `p/phpcs-security-audit` yang menemui vulnerability sebenar. Tiada satu set yang cukup.
 
 **Peraturan sendiri.** Selain set daripada pustaka, `--config` menerima fail atau folder YAML anda sendiri (contohnya `--config peraturan-kami/`), dan peraturan sendiri digabungkan dengan set lain dengan cara yang sama. Itulah padanan Semgrep bagi "peraturan custom" Gitleaks dalam Modul 1.
 
@@ -145,7 +145,7 @@ Catat dalam jadual: fail, baris, nama peraturan, dan pada fikiran anda sama ada 
 
 ## Makmal 2.2: Bandingkan set peraturan
 
-**Tujuan.** Lihat bahawa jawapan "berapa banyak kelemahan?" bergantung pada peraturan yang dimuatkan.
+**Tujuan.** Lihat bahawa jawapan "berapa banyak vulnerability?" bergantung pada peraturan yang dimuatkan.
 
 <div class="trk trk-a" markdown="1">
 
@@ -252,7 +252,7 @@ Untuk setiap temuan dari Makmal 2.1, buka fail pada baris itu dan baca kod. Tany
 
 **Tujuan.** Sedar bahawa "tiada temuan" bukan bermakna "selamat".
 
-Rujuk senarai kelemahan dalam threat model Modul 0 dan jadual Makmal 0.3. Dari temuan Semgrep, kelemahan mana yang **anda tahu wujud tetapi tiada temuan**?
+Rujuk senarai vulnerability dalam threat model Modul 0 dan jadual Makmal 0.3. Dari temuan Semgrep, vulnerability mana yang **anda tahu wujud tetapi tiada temuan**?
 
 Cuba cari sendiri dalam kod:
 
@@ -279,14 +279,14 @@ Baca laluan `/search`, `/guestbook`, `/download`, `/redirect`, `/admin`, `/api/u
 <details>
 <summary>Jawapan</summary>
 
-Kelemahan berikut **tiada temuan** daripada set yang diuji:
+Vulnerability berikut **tiada temuan** daripada set yang diuji:
 
-| Kelemahan | Kenapa terlepas |
+| Vulnerability | Kenapa terlepas |
 |---|---|
 | XSS (pantulan dan tersimpan) | Output HTML dibina daripada rentetan; tiada peraturan menandainya dalam konteks ini |
 | Path traversal | Gabungan laluan dengan input tidak ditanda |
 | Open redirect | Tidak ditanda |
-| Cookie sesi boleh dipalsukan, IDOR | Kelemahan **logik**, bukan corak |
+| Cookie sesi boleh dipalsukan, IDOR | Vulnerability **logik**, bukan corak |
 | Mass assignment (Laravel) | Konfigurasi model, bukan corak fungsi |
 | Trek A: MD5, CORS terlalu longgar | Tiada peraturan dalam set yang diuji |
 | Trek B: SQL injection | Peraturan taint tidak mengesannya dalam bentuk kod ini (lihat di bawah) |
@@ -298,9 +298,9 @@ Dua kategori ini yang DAST (Modul 5) dan ujian manual akan tutup. Itulah sebab s
 
 ## Makmal 2.5: Baiki dan sahkan
 
-**Tujuan.** Membaiki kelemahan yang SAST nampak, dan **mengesahkan** pembaikan itu dengan dua cara.
+**Tujuan.** Membaiki vulnerability yang SAST nampak, dan **mengesahkan** pembaikan itu dengan dua cara.
 
-Pembaikan sudah disediakan sebagai **fail ganti** supaya masa makmal digunakan untuk **memahami dan mengesahkan**, bukan menulis semula kod. Ia membaiki empat kelemahan: SQL injection pada `/search` dan `/login`, command injection pada `/ping`, dan deserialization pada `/api/import`.
+Pembaikan sudah disediakan sebagai **fail ganti** supaya masa makmal digunakan untuk **memahami dan mengesahkan**, bukan menulis semula kod. Ia membaiki empat vulnerability: SQL injection pada `/search` dan `/login`, command injection pada `/ping`, dan deserialization pada `/api/import`.
 
 **Langkah 1: gantikan fail yang bermasalah.** Fail ganti ada dalam repo tutorial (`~/um-devsecops`, juga di bahagian **Fail modul**). Dari folder `~/devsecops-lab`:
 
@@ -352,7 +352,7 @@ Fail ganti **menggantikan seluruh fail**. Jika anda sudah mengubah fail itu send
 
 </div>
 
-Tiga corak pembaikan yang sama berulang pada kebanyakan kelemahan injection:
+Tiga corak pembaikan yang sama berulang pada kebanyakan vulnerability injection:
 
 - **SQL:** gunakan **query berparameter**, jangan gabung rentetan.
 - **Command injection:** elak shell, hantar hujah sebagai senarai atau melalui `escapeshellarg`, dan sahkan input dengan **senarai putih** aksara.
@@ -439,7 +439,7 @@ Pengajaran: **ujian fungsi** (carian dan log masuk) ialah satu-satunya bukti bah
 
 **Tujuan.** Menyemak kod yang kelihatan baik tetapi tidak selamat, dan memahami kenapa kelajuan menulis tidak menambah kelajuan menyemak.
 
-Simpan `contoh-ai.cs` dan `contoh-ai.php` (bahagian **Fail modul**) dalam satu folder `contoh-ai/`. Fail itu mewakili jawapan asisten AI kepada permintaan "tulis kelas log masuk dan muat turun fail". Baca dahulu dan senaraikan kelemahan yang anda nampak (5 minit), kemudian imbas:
+Simpan `contoh-ai.cs` dan `contoh-ai.php` (bahagian **Fail modul**) dalam satu folder `contoh-ai/`. Fail itu mewakili jawapan asisten AI kepada permintaan "tulis kelas log masuk dan muat turun fail". Baca dahulu dan senaraikan vulnerability yang anda nampak (5 minit), kemudian imbas:
 
 <div class="trk trk-a" markdown="1">
 
@@ -461,7 +461,7 @@ done
 
 Soalan:
 
-1. Berapa kelemahan yang anda tulis? Berapa yang ditangkap Semgrep?
+1. Berapa vulnerability yang anda tulis? Berapa yang ditangkap Semgrep?
 2. Kenapa Semgrep menangkap SQL injection di sini, sedangkan pada app lab Trek B ia **tidak** menangkapnya sama sekali?
 3. Siapa yang bertanggungjawab ke atas kod ini jika ia sampai ke produksi?
 
@@ -470,13 +470,13 @@ Soalan:
 
 <div class="trk trk-a" markdown="1">
 
-Kelemahan dalam `contoh-ai.cs`: SQL injection, kata laluan ditanam dalam kod, MD5, pengesahan sijil TLS dimatikan, dan path traversal. Semgrep (set di atas) menangkap **hanya SQL injection**. Yang lain perlu: Gitleaks (kata laluan), peraturan tambahan (MD5, TLS), dan semakan manusia (path traversal).
+Vulnerability dalam `contoh-ai.cs`: SQL injection, kata laluan ditanam dalam kod, MD5, pengesahan sijil TLS dimatikan, dan path traversal. Semgrep (set di atas) menangkap **hanya SQL injection**. Yang lain perlu: Gitleaks (kata laluan), peraturan tambahan (MD5, TLS), dan semakan manusia (path traversal).
 
 </div>
 
 <div class="trk trk-b" markdown="1">
 
-Kelemahan dalam `contoh-ai.php`: SQL injection, `include` daripada input (LFI/RFI), MD5, `unserialize` daripada cookie, command injection, XSS dan kata laluan DB ditanam. Hasil mengikut set: `p/default` menangkap SQL injection, `unserialize` dan `exec`; `p/php` menangkap SQL injection, exec dan XSS; `p/phpcs-security-audit` menangkap `include`, MD5 dan exec. **Tiada satu set** menangkap kesemuanya, dan kata laluan DB perlu Gitleaks.
+Vulnerability dalam `contoh-ai.php`: SQL injection, `include` daripada input (LFI/RFI), MD5, `unserialize` daripada cookie, command injection, XSS dan kata laluan DB ditanam. Hasil mengikut set: `p/default` menangkap SQL injection, `unserialize` dan `exec`; `p/php` menangkap SQL injection, exec dan XSS; `p/phpcs-security-audit` menangkap `include`, MD5 dan exec. **Tiada satu set** menangkap kesemuanya, dan kata laluan DB perlu Gitleaks.
 
 </div>
 
@@ -647,7 +647,7 @@ Pipeline kali ini mesti **lulus** (`passed`, tanda hijau).
 
 Pipeline mesti **gagal** (`failed`). Log berakhir dengan `ERROR: Job failed: exit code 1`, dan di atasnya anda melihat **tiga temuan `weak-crypto`**: MD5 pada `DatabaseSeeder.php` (dua) dan `routes/web.php` (satu). Jika anda belum menerima `exec-use` dalam Makmal 2.7, anda akan melihat empat.
 
-MD5 untuk kata laluan ialah kelemahan **sebenar**, jadi jangan tutup dengan `nosemgrep`. Ia dibaiki dalam Modul 6 dengan tampalan bcrypt. Untuk sekarang pipeline kekal merah, dan itulah tugas pintu: tiada kod dengan kelemahan sebenar boleh melepasinya.
+MD5 untuk kata laluan ialah vulnerability **sebenar**, jadi jangan tutup dengan `nosemgrep`. Ia dibaiki dalam Modul 6 dengan tampalan bcrypt. Untuk sekarang pipeline kekal merah, dan itulah tugas pintu: tiada kod dengan vulnerability sebenar boleh melepasinya.
 
 </div>
 
@@ -665,7 +665,7 @@ MD5 untuk kata laluan ialah kelemahan **sebenar**, jadi jangan tutup dengan `nos
 - [ ] Saya menjalankan Semgrep dan mencatat 7 temuan dengan keterukan masing-masing
 - [ ] Saya membandingkan set peraturan dan tahu kenapa bilangannya berbeza
 - [ ] Saya mengklasifikasikan setiap temuan (benar, positif palsu, bunyi)
-- [ ] Saya menyenaraikan kelemahan yang SAST terlepas dan tahu alat mana yang akan menangkapnya
+- [ ] Saya menyenaraikan vulnerability yang SAST terlepas dan tahu alat mana yang akan menangkapnya
 - [ ] Saya menggantikan fail dengan pembaikan, memahami perubahannya, dan mengesahkan dengan ujian fungsi **dan** imbasan semula
 - [ ] Saya mengimbas kod yang dijana AI dan menerangkan kenapa saya bertanggungjawab ke atasnya
 - [ ] Saya boleh menjadikan Semgrep pintu dalam pipeline dengan `--error` dan menerima temuan dengan `nosemgrep` beralasan

@@ -74,9 +74,9 @@ def fig_html(name):
 
 
 WIDGETS = {
-    "alat": """<section class="widget" aria-labelledby="w-alat-t"><h4 id="w-alat-t">Alat mana menangkap kelemahan ini?</h4>
-<p class="wnote">Pilih satu kelemahan yang ditanam dalam app lab. Hasilnya daripada ujian sebenar di server lab (trek yang anda pilih di menu kiri menentukan app yang dipaparkan).</p>
-<label class="wgrid" style="display:block"><select id="wt-sel" class="wsel" aria-label="Pilih kelemahan"></select></label>
+    "alat": """<section class="widget" aria-labelledby="w-alat-t"><h4 id="w-alat-t">Alat mana menangkap vulnerability ini?</h4>
+<p class="wnote">Pilih satu vulnerability yang ditanam dalam app lab. Hasilnya daripada ujian sebenar di server lab (trek yang anda pilih di menu kiri menentukan app yang dipaparkan).</p>
+<label class="wgrid" style="display:block"><select id="wt-sel" class="wsel" aria-label="Pilih vulnerability"></select></label>
 <p class="wnote" id="wt-note" style="margin-top:10px"></p>
 <div class="wtool" id="wt-out"></div></section>""",
     "pipeline": """<section class="widget" aria-labelledby="w-pipe-t"><h4 id="w-pipe-t">Penjelajah pipeline</h4>

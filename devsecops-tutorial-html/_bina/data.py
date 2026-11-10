@@ -6,7 +6,7 @@ CAPTIONS = {
     "dfd-kedai": "DFD Kedai Bengkel dengan sempadan kepercayaan dan tag STRIDE pada setiap aliran yang merentas sempadan.",
     "seni-bina-makmal": "Laptop anda menjalankan app, alat imbasan dan kluster k3d; imej dihantar ke Harbor di Linode melalui HTTPS.",
     "alat-di-mana": "Alat di laptop anda (dijalankan sendiri) dan alat di server Linode (berjalan automatik selepas git push).",
-    "aliran-harbor": "Imej ditolak, diimbas secara automatik, dan polisi menyekat pull bagi imej dengan kerentanan High atau lebih tinggi.",
+    "aliran-harbor": "Imej ditolak, diimbas secara automatik, dan polisi menyekat pull bagi imej dengan vulnerability High atau lebih tinggi.",
     "rantaian-bekalan": "Setiap peringkat menambah bukti (SBOM, tandatangan) yang disemak oleh Kyverno sebelum pod berjalan.",
     "lapisan-hardening": "Pertahanan berlapis: admission, Pod Security Standards, securityContext dan NetworkPolicy.",
 }
@@ -96,7 +96,7 @@ FLAWS = [
       semgrep=(OK, "p/default: unserialize-use."), zap=(NO, "Tidak dikesan.")),
     F("B12", "b", "MD5 untuk kata laluan", "Hash lemah.",
       semgrep=(OK, "p/phpcs-security-audit: weak-crypto (3 lokasi).")),
-    F("B14", "b", "Pakej lapuk (phpmailer 6.4.1, php-jwt 5.0.0)", "Dua pakej dengan kerentanan diketahui.",
+    F("B14", "b", "Pakej lapuk (phpmailer 6.4.1, php-jwt 5.0.0)", "Dua pakej dengan vulnerability diketahui.",
       sca=(OK, "composer audit: 4 advisori (1 Critical, 2 High, 1 Low)."), trivy=(OK, "4 CVE daripada composer.lock, tanpa langkah tambahan.")),
     F("B15", "b", "Secret dalam kod dan Dockerfile", "config/kedai.php dan ENV.",
       gitleaks=(OK, "generic-api-key: 4 temuan."), trivy=(NO, "Pengimbas secret tidak menangkap."), checkov=(NO, "Tidak menangkap.")),
@@ -134,19 +134,19 @@ PIPEDATA = [
     {"name": "2 · Pull request", "rows": [
         ["Alat", "Gitleaks (sejarah), Semgrep (SAST), Trivy fs (SCA)"],
         ["Arahan", "<code>gitleaks git .</code> · <code>semgrep scan --config p/default --config p/gitlab</code> · <code>trivy fs --severity HIGH,CRITICAL --exit-code 1 .</code>"],
-        ["Gagal bila", "Secret baharu (selepas baseline), temuan Semgrep ERROR, kerentanan High/Critical dalam pakej"],
+        ["Gagal bila", "Secret baharu (selepas baseline), temuan Semgrep ERROR, vulnerability High/Critical dalam pakej"],
         ["Masa diukur", "Gitleaks 0.7 s · Semgrep 7.5 s · Trivy fs 1 s"],
         ["Nota", "Semgrep: set peraturan menentukan apa yang dilihat. Trivy memerlukan <code>packages.lock.json</code> (.NET)."]]},
     {"name": "3 · Binaan imej", "rows": [
         ["Alat", "hadolint, Trivy config, Checkov, kemudian Trivy image"],
         ["Arahan", "<code>hadolint Dockerfile</code> · <code>trivy config --exit-code 1 --severity HIGH,CRITICAL .</code> · <code>trivy image --exit-code 1 --severity CRITICAL IMEJ</code>"],
-        ["Gagal bila", "Dockerfile/manifest melanggar peraturan, atau imej ada kerentanan Critical"],
+        ["Gagal bila", "Dockerfile/manifest melanggar peraturan, atau imej ada vulnerability Critical"],
         ["Masa diukur", "Binaan .NET 33 s · trivy config 1.5 s · trivy image 15 s · Checkov 9.5 s · hadolint 0.4 s"],
         ["Nota", "Bina dengan <code>--provenance=false --sbom=false</code> supaya polisi Harbor berkuat kuasa."]]},
     {"name": "4 · Registry (Harbor)", "rows": [
         ["Alat", "Harbor + Trivy terbina dalam"],
         ["Arahan", "<code>docker push harbor.lab.test/pesertaNN/app:tag</code>"],
-        ["Gagal bila", "Pull ditolak (HTTP 412) jika ada kerentanan pada atau melebihi ambang projek (High)"],
+        ["Gagal bila", "Pull ditolak (HTTP 412) jika ada vulnerability pada atau melebihi ambang projek (High)"],
         ["Masa diukur", "Imbasan automatik selesai dalam kira-kira 10 saat bagi imej kecil; beberapa puluh saat bagi imej besar"],
         ["Nota", "Polisi menghalang <b>pull</b>, bukan <b>push</b>. Imej yang dibina dengan attestation (OCI index) terlepas polisi."]]},
     {"name": "5 · Persekitaran ujian", "rows": [
@@ -154,7 +154,7 @@ PIPEDATA = [
         ["Arahan", "<code>zap-baseline.py -t URL</code> · <code>zap.sh -cmd -autorun zap-plan.yaml</code> · <code>zap-api-scan.py -t openapi.json -f openapi</code>"],
         ["Gagal bila", "Peraturan yang ditetapkan FAIL dalam fail konfigurasi (baseline exit 1); tanpa itu amaran memberi exit 2"],
         ["Masa diukur", "Baseline ≈ 35 s · pelan aktif ≈ 90 s (ASP.NET) dan ≈ 100 s (Laravel) · API ≈ 40 s. Memori puncak ≈ 0.8 GB dengan pelan; <code>zap-full-scan.py</code> memakai hingga 4.4 GB"],
-        ["Nota", "Baseline (pasif) terlepas hampir semua kelemahan sebenar. Jalankan aktif pada app ujian sahaja, bukan produksi. Had memori 2 GB pada kontena."]]},
+        ["Nota", "Baseline (pasif) terlepas hampir semua vulnerability sebenar. Jalankan aktif pada app ujian sahaja, bukan produksi. Had memori 2 GB pada kontena."]]},
     {"name": "6 · Admission", "rows": [
         ["Alat", "Pod Security Standards + Kyverno"],
         ["Arahan", "<code>kubectl label ns lab pod-security.kubernetes.io/enforce=restricted</code> · ClusterPolicy Kyverno (tag, registry, tandatangan cosign)"],
