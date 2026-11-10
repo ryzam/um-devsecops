@@ -52,6 +52,45 @@ Dalam makmal ini anda akan melihat ketiga-tiganya dengan data sebenar.
 
 **Semgrep** menulis peraturan dalam bentuk yang kelihatan seperti kod itu sendiri, dan mempunyai pustaka peraturan komuniti (`p/default`, `p/owasp-top-ten`, `p/gitlab` dan lain-lain). Ia menyokong C#, PHP dan banyak bahasa lain dalam satu alat. Untuk .NET dan Laravel, alat khusus bahasa wujud sebagai pelengkap: penganalisis Roslyn (`Microsoft.CodeAnalysis.NetAnalyzers`, Security Code Scan) dan PHPStan/Larastan. Bengkel ini menumpu pada Semgrep supaya kedua-dua trek mempunyai alat yang sama.
 
+### Set peraturan Semgrep (`p/csharp`, `p/default` dan lain-lain)
+
+Semgrep sendiri hanya enjin. **Apa yang dicarinya ditentukan oleh peraturan yang anda muatkan.** Peraturan dikumpul dalam **set** (*ruleset*, kadang-kadang disebut *pack*), dan anda memilih set dengan `--config`:
+
+```bash
+semgrep scan --config p/csharp aspnet-app
+```
+
+Cara membaca `p/csharp`:
+
+- **`p/`** ialah awalan untuk set dalam pustaka peraturan Semgrep (*registry*, semgrep.dev). Set itu dimuat turun semasa imbasan, jadi laptop atau runner CI mesti boleh mencapai internet.
+- **`csharp`** ialah nama set: peraturan khusus untuk bahasa C#. Anda boleh membaca isi sesuatu set dengan membuka `https://semgrep.dev/p/csharp` dalam pelayar.
+
+Set yang kita guna, dan apa yang Semgrep v1.183.0 jalankan pada app ASP.NET (Trek A) dalam bengkel:
+
+| Set | Isi | Peraturan yang dijalankan | Temuan |
+|---|---|---|---|
+| `p/csharp` | Peraturan am untuk C# | 27 | 1 |
+| `p/default` | Set lalai, merentas banyak bahasa, termasuk Dockerfile | 89 | 3 |
+| `p/gitlab` | Peraturan yang digunakan oleh GitLab SAST, termasuk Security Code Scan untuk .NET (ID `SCS0001`, `SCS0002`) | 20 | 4 |
+| `p/owasp-top-ten` | Peraturan yang dipetakan kepada OWASP Top 10 | 39 | 2 |
+| `p/secrets` | Kunci dan token dalam kod | 36 | 0 |
+
+"Peraturan yang dijalankan" ialah peraturan yang berkenaan dengan fail dalam app ini, bukan jumlah seluruh set: set bahasa lain dilangkau. Itu juga sebabnya `p/csharp` hanya memeriksa satu fail (`.cs`), manakala `p/default` memeriksa enam fail termasuk Dockerfile.
+
+**Menggabungkan set.** Ulang `--config`. Pipeline kita menggabungkan beberapa set:
+
+```bash
+semgrep scan --config p/default --config p/gitlab aspnet-app
+```
+
+Gabungan `p/default` dan `p/gitlab` menjalankan 109 peraturan dan menemui 7 temuan, lebih banyak daripada mana-mana satu set sendirian. Itulah yang Makmal 2.2 tunjukkan.
+
+**Memilih set.** Pilih mengikut **bahasa dan framework**, bukan nama yang paling sepadan. Untuk app ini, `p/csharp` menemui paling sedikit, dan `p/gitlab` menemui SQL injection dan command injection. Untuk Laravel pula, `p/gitlab` menemui 0 temuan dan `p/phpcs-security-audit` yang menemui kelemahan sebenar. Tiada satu set yang cukup.
+
+**Peraturan sendiri.** Selain set daripada pustaka, `--config` menerima fail atau folder YAML anda sendiri (contohnya `--config peraturan-kami/`), dan peraturan sendiri digabungkan dengan set lain dengan cara yang sama. Itulah padanan Semgrep bagi "peraturan custom" Gitleaks dalam Modul 1.
+
+**Hasil boleh berubah.** Set dikemas kini oleh pustaka, jadi temuan baharu boleh muncul walaupun kod tidak berubah. Kerana itu pipeline mengunci versi Semgrep (`semgrep/semgrep:1.183.0`), tetapi set peraturannya tetap yang terkini apabila imbasan berjalan. Bila bilangan temuan berubah tanpa perubahan kod, semak dahulu sama ada ada peraturan baharu.
+
 ### Semgrep lawan SonarQube
 
 Banyak organisasi sudah menggunakan **SonarQube**, jadi anda mungkin bertanya kenapa ia tidak ada dalam bengkel ini. Kedua-duanya ialah alat analisis statik, tetapi dibina untuk tujuan yang berbeza:
